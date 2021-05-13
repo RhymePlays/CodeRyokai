@@ -12,6 +12,7 @@ body {
     background-color: #303030;
     position: relative;
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    color: white;
 }
 
 /* G */
@@ -21,11 +22,11 @@ body {
     background-color: #1BADFF;
     border-radius: 40px;
     padding: 5px 10px;
-    color: white;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    margin-right: 10px;
+    margin: 10px;
     cursor: pointer;
+    white-space: nowrap
 }
 
 .cVR {
@@ -58,7 +59,6 @@ hr {
 .cH1 {
     font-size: 25px;
     font-weight: bold;
-    color: white;
     margin: 10px;
     width: 100%;
 }
@@ -77,7 +77,7 @@ hr {
 }
 #topName {
     color: #25FFB1;
-    font-size: 1.3rem;
+    font-size: 25px;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     width: 100%;
@@ -94,50 +94,33 @@ hr {
 
 /* ProfileSection */
 .profileContainer {
-    color: white;
+    display: flex;
+    margin: 10px;
+    font-size: 18px;
+}
+
+/* NoteSection */
+.notesContainer{
+    display: flex;
+    flex-direction: row;
+}
+#notesRange{
+    color: #A0A0A0;
+    font-weight: normal;
+}
+.noteItem{
     display: flex;
     margin: 10px;
 }
-
-.button1 {
-    background-color: #FB1E46;
-    border-radius: 40px;
-    padding: 5px 23px;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
-    margin-right: 14px;
-    cursor: pointer;
-    width: 110px;
+.noteItemLeft{
+    height: auto;
+    width: 10px;
+    border-radius: 5px;
+    background: #1BADFF;
+    margin-right: 5px
 }
-
-#addNoteButton
-{
-    background-color: #25FFB1;
-    color: black;
-    border-radius: 40px;
-    padding: 5px 20px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
-    margin-right: 14px;
-    cursor: pointer;
-}
-
-.buttonNotes
-{
-    display: flex;
-    justify-content: flex-end;
-}
-
-#addNoteButton
-{
-    background-color: #FB1E46;
-    border-radius: 40px;
-    padding: 5px 20px;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
-    margin-right: px;
-    cursor: pointer;
-    width: 142px;
+.noteItemInfo{color: #A0A0A0;}
+.noteItemText{
+    margin-top: 5px;
+    font-size: 20px;
 }

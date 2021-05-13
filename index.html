@@ -36,22 +36,49 @@
                 </div>
                 <div class="cVR"></div>
                 <div class="profileBioSection">
-                    <div class="cH2">Bio</div>
+                    <b>Bio</b>
                     <div id="profileBio">N/A</div>
                 </div>
             </div>
         </div>
-        
-        
+
         <div id="notesSection" class="sectionBG">
             <div class="sectionTop">
-                <div class="cH1">Notes</div>
-               <div class="buttonNotes">
-                <div class="button1" id='removeNoteButton'>Remove  Note</div>
-                <div id='addNoteButton'>Add Note</div>
-               </div>
+                <div class="cH1">Notes <span id="notesRange">(0-20)</span></div>
+                <div class="button" id="addNoteButton">Add Note</div>
             </div>
             <hr>
+            <div id="notesContainer">
+
+                <div class="noteItem">
+                    <div class="noteItemLeft"></div>
+                    <div class="noteItemRight">
+                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
+                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
+                        <div class="noteItemText">This is where notes are gonna be shown, hopefully the final product will look good.</div>
+                    </div>
+                </div>
+
+                <div class="noteItem">
+                    <div class="noteItemLeft"></div>
+                    <div class="noteItemRight">
+                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
+                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
+                        <div class="noteItemText">Note text here.</div>
+                    </div>
+                </div>
+                <div class="noteItem">
+                    <div class="noteItemLeft"></div>
+                    <div class="noteItemRight">
+                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
+                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
+                        <div class="noteItemText">Note text here.</div>
+                    </div>
+                </div>
+                
+                <div class="button">Load More</div>
+                
+            </div>
         </div>
     </div>
 </body>

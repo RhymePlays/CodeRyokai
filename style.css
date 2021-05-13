@@ -98,3 +98,46 @@ hr {
     display: flex;
     margin: 10px;
 }
+
+.button1 {
+    background-color: #FB1E46;
+    border-radius: 40px;
+    padding: 5px 23px;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    margin-right: 14px;
+    cursor: pointer;
+    width: 110px;
+}
+
+#addNoteButton
+{
+    background-color: #25FFB1;
+    color: black;
+    border-radius: 40px;
+    padding: 5px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    margin-right: 14px;
+    cursor: pointer;
+}
+
+.buttonNotes
+{
+    display: flex;
+    justify-content: flex-end;
+}
+
+#addNoteButton
+{
+    background-color: #FB1E46;
+    border-radius: 40px;
+    padding: 5px 20px;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    margin-right: px;
+    cursor: pointer;
+    width: 142px;
+}

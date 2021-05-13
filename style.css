@@ -11,6 +11,7 @@ And also, use proper comments to specify each section.
 body {
     background-color: #303030;
     position: relative;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 /* G */
@@ -26,6 +27,15 @@ body {
     margin-right: 10px;
     cursor: pointer;
 }
+
+.cVR {
+    height: auto;
+    width: 3px;
+    border-radius: 2.5px;
+    background-color: #303030;
+    margin: 0px 10px;
+}
+
 hr {
     border: 1px #303030 solid ;
     margin: 5px 10px;
@@ -36,6 +46,7 @@ hr {
     width: 900px;
     border-radius: 15px;
     align-items: center;
+    margin-bottom: 10px;
 }
 .sectionTop {
     width: 100%;
@@ -77,7 +88,13 @@ hr {
 #mainSection {
     margin: 10px 0px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ProfileSection */
+.profileContainer {
+    color: white;
+    display: flex;
+    margin: 10px;
+}

@@ -1,40 +1,20 @@
-*
-{
+/*
+Follow my scheme for the css.
+And also, use proper comments to specify each section.
+*/
+
+* {
     margin: 0;
     padding: 0;
 }
 
-body
-{
+body {
     background-color: #303030;
     position: relative;
 }
 
-#topBar
-{
-    background-color: #404040;
-    display: flex;
-    align-items: center;
-    height: 50px;
-}
-
-#logo{
-    margin-left: 10px;
-    min-height: 40px;
-    min-width: 40px;
-}
-#topName
-{
-   color: #25FFB1;
-   font-size: 1.3rem;
-   font-family: 'Montserrat', sans-serif;
-   font-weight: bold;
-   width: 100%;
-   margin-left: 10px;
-}
-
-.button
-{
+/* Global */
+.button {
     background-color: #1BADFF;
     border-radius: 40px;
     padding: 5px 10px;
@@ -42,43 +22,60 @@ body
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
     margin-right: 10px;
+    cursor: pointer;
+}
+hr {
+    border: 1px #303030 solid ;
+    margin: 5px 10px;
 }
 
-#mainSection
-{
-    margin: 10px 0px;
-    display: flex;
-    justify-content: center;
-}
-
-#profileSection
-{
+.sectionBG {
     background-color: #404040;
-    max-width: 900px;
+    width: 900px;
     border-radius: 15px;
     align-items: center;
 }
-
-.sectionTop
-{
-    width: 1260px;
+.sectionTop {
+    width: 100%;
     font-family: 'Montserrat', sans-serif;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-
-.cH1
-{
+.cH1 {
     font-size: 25px;
     font-weight: bold;
     color: white;
     margin: 10px;
+    width: 100%;
 }
 
-.solid-hr
-{
-    max-width: 898px;
-    border: 1px solid black;
-    margin-top: 5px;
+/* TopBar */
+#topBar {
+    background-color: #404040;
+    display: flex;
+    align-items: center;
+    height: 50px;
 }
+#logo {
+    margin-left: 10px;
+    min-height: 40px;
+    min-width: 40px;
+}
+#topName {
+    color: #25FFB1;
+    font-size: 1.3rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    width: 100%;
+    margin-left: 10px;
+}
+
+/* MainSection */
+#mainSection {
+    margin: 10px 0px;
+    display: flex;
+    justify-content: center;
+}
+
+/* ProfileSection */

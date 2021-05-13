@@ -1,0 +1,80 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+body
+{
+    background-color: #303030;
+    position: relative;
+}
+
+#topBar
+{
+    background-color: #404040;
+    display: flex;
+    align-items: center;
+}
+
+
+#topName
+{
+   color: #25FFB1;
+   font-size: 1.3rem;
+   font-family: 'Montserrat', sans-serif;
+   font-weight: bold;
+   width: 173;
+   height: 60;
+}
+
+.button
+{
+    text-decoration: none;
+    background-color: #1BADFF;
+    border-radius: 40px;
+    padding: 5px 10px;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
+
+.sep
+{
+    width: 100px;
+}
+
+#topBar::after
+{
+    display: table;
+    content: '';
+    clear: both;
+}
+
+#profileSection
+{
+    background-color: #404040;
+}
+
+.section
+{
+    width: 1260px;
+    height: 250px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.profile-heading
+{
+    font-size: 25px;
+    font-weight: bold;
+    width: 126px;
+    height: 50px;
+    color: white;
+}
+
+.followButton
+{
+    display: flex;
+    justify-content: flex-end;
+    
+}

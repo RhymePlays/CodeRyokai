@@ -15,9 +15,14 @@ body
     background-color: #404040;
     display: flex;
     align-items: center;
+    height: 50px;
 }
 
-
+#logo{
+    margin-left: 10px;
+    min-height: 40px;
+    min-width: 40px;
+}
 #topName
 {
    color: #25FFB1;
@@ -25,7 +30,7 @@ body
    font-family: 'Montserrat', sans-serif;
    font-weight: bold;
    width: 100%;
-   margin-left: 30px;
+   margin-left: 10px;
 }
 
 .button
@@ -36,23 +41,12 @@ body
     color: white;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    margin-right: 8px;
-}
-
-.sep1
-{
-    width: 100%;
-}
-
-#topBar::after
-{
-    display: table;
-    content: '';
-    clear: both;
+    margin-right: 10px;
 }
 
 #mainSection
 {
+    margin: 10px 0px;
     display: flex;
     justify-content: center;
 }
@@ -68,23 +62,19 @@ body
 .sectionTop
 {
     width: 1260px;
-    height: 250px;
     font-family: 'Montserrat', sans-serif;
     display: flex;
     flex-direction: row;
-
+    align-items: center;
 }
 
 .cH1
 {
     font-size: 25px;
     font-weight: bold;
-    width: 126px;
-    height: 50px;
     color: white;
     margin: 10px;
 }
-
 
 .solid-hr
 {

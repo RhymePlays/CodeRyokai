@@ -19,12 +19,15 @@
             margin: 0;
             padding: 0;
         }
-
+        html{
+            height: 100%;
+        }
         body {
             background-color: #303030;
             position: relative;
             font-family: 'Roboto', Arial, Helvetica, sans-serif;
             color: white;
+            height: 100%;
         }
 
         /* G */
@@ -75,6 +78,16 @@
             width: 100%;
         }
 
+        .CInput{
+            background: #303030;
+            color: white;
+            height: 30px;
+            font-size: 25px;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 10px 0px;
+        }
+
         /* TopBar */
         #topBar {
             background-color: #404040;
@@ -104,6 +117,23 @@
             align-items: center;
         }
 
+        /*OverPage*/
+        #overPanel{
+            display: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .overPanelInnerSection{
+            margin: 10px;
+        }
+
         /* ProfileSection */
         .profileContainer {
             display: flex;
@@ -111,6 +141,7 @@
             font-size: 18px;
         }
         #followUnfollowButton{display: none;}
+        #editAboutButton{display: none;margin: 0px 10px;color: #1BADFF;cursor: pointer;}
 
         /* NoteSection */
         .notesContainer{
@@ -149,6 +180,8 @@
         <div id="topName">Magic Notes</div>
         <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
     </div>
+    
+    <div id="overPanel"></div>
 
     <div id="mainSection">
 
@@ -168,7 +201,7 @@
                 </div>
                 <div class="cVR"></div>
                 <div class="profileAboutSection">
-                    <b>About</b>
+                    <b>About</b><span id="editAboutButton" onclick="javascript:editAboutButton()">Edit</span>
                     <div id="profileAbout"></div>
                 </div>
             </div>
@@ -185,6 +218,7 @@
             <hr>
             <div id="notesContainer"></div>
         </div>
+
     </div>
 
     <script>
@@ -196,12 +230,16 @@
             profileEntries: document.getElementById("profileEntries"),
             profileFollower: document.getElementById("profileFollower"),
             profileFollowing: document.getElementById("profileFollowing"),
+            editAboutButton: document.getElementById("editAboutButton"),
             profileAbout: document.getElementById("profileAbout"),
             followUnfollowButton: document.getElementById("followUnfollowButton"),
 
             notesRange: document.getElementById("notesRange"),
             addNoteButton: document.getElementById("addNoteButton"),
             notesContainer: document.getElementById("notesContainer"),
+            
+            overPanel: document.getElementById("overPanel"),
+
         }
         var Variables = {
             loggedIn: false,
@@ -258,6 +296,12 @@
                         });
                     }
 
+                    if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                        Elements.editAboutButton.style.display="inline";
+                    }else{
+                        Elements.editAboutButton.style.display="none";
+                    }
+
                 }
             });
         }
@@ -311,20 +355,50 @@
 
         function loginProfileButton(){
             if (Variables.loggedIn == false){
-                let username = prompt("Username");
-                let password = prompt("Password");
-                request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
-                    if (rawRes == "success"){
-                        Variables.loggedIn=true;
-                        Variables.username=username;
-                        Variables.password=password;
-
-                        Elements.loginProfileButton.innerText = "Profile"
-                        populateProfileSection();populateNotesSection(Variables.fromIndex, Variables.toIndex)
-                    }
-                });
+                Elements.overPanel.style.display="flex"
+                Elements.overPanel.innerHTML=`
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Login</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        Username
+                        <div class="CInput" id="overPanelUsername" contentEditable="true"></div>
+                        Password
+                        <div class="CInput" id="overPanelPassword" contentEditable="true"></div>
+                        Email (Only when Signing Up)
+                        <div class="CInput" id="overPanelEmail" contentEditable="true"></div>
+                    </div>
+                    <div class="button" onclick="javascript:login()">Login</div>
+                    <div class="button" onclick="javascript:signup()">Signup</div>
+                </div>`
             }else{/*profile code here*/}
         }
+        function login(){
+            let username = document.getElementById("overPanelUsername").innerText;
+            let password = document.getElementById("overPanelPassword").innerText;
+            request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
+                if (rawRes == "success"){
+                    Variables.loggedIn=true;
+                    Variables.username=username;
+                    Variables.password=password;
+    
+                    Elements.loginProfileButton.innerText = "Profile"
+                    populateProfileSection();populateNotesSection(Variables.fromIndex, Variables.toIndex);closeOverPanel()
+                }
+            });
+        }
+        function signup(){
+            let username = document.getElementById("overPanelUsername").innerText;
+            let password = document.getElementById("overPanelPassword").innerText;
+            let email = document.getElementById("overPanelEmail").innerText;
+            request("POST", `/api/signup?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`, (rawRes)=>{
+                if (rawRes == "success"){login();}
+            });
+        }
+
 
         function followUnfollowButton(){
             if (Variables.loggedIn == true){
@@ -338,6 +412,30 @@
             };
         }
 
+        function editAboutButton(){
+            if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                Elements.overPanel.style.display="flex"
+                Elements.overPanel.innerHTML=`
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Edit About</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        <div class="CInput" id="overPanelAbout" contentEditable="true"></div>
+                    </div>
+                    <div class="button" onclick="javascript:editAbout()">Save</div>
+                </div>`
+            };
+        }
+        function editAbout(){
+            let about = document.getElementById("overPanelAbout").innerText;
+            request("POST", `/api/addAbout?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&aboutStr=${encodeURIComponent(about)}`, (rawRes)=>{
+                if (rawRes == "success"){populateProfileSection();closeOverPanel();}
+            });
+        }
+
         function notesRangeLeftButton(){
             let diff = 10;
             if (Variables.fromIndex-diff >= 0){
@@ -346,23 +444,43 @@
         }
         function notesRangeRightButton(){
             let diff = 10;
-            if (Variables.fromIndex <= Variables.pageEntries-1){
+            if (Variables.fromIndex < Variables.pageEntries-1){
                 populateNotesSection((Variables.fromIndex+diff), (Variables.toIndex+diff));
             }
         }
 
         function addNoteButton(){
             if (Variables.loggedIn && Variables.pageUsername==Variables.username){
-                request("POST", `/api/addNote?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&noteStr=${encodeURIComponent(prompt("Note:"))}`, function(rawRes){
-                    if (rawRes == "success"){populateNotesSection(0, 10);}
-                });
+                Elements.overPanel.style.display="flex"
+                Elements.overPanel.innerHTML=`
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Add Note</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        <div class="CInput" id="overPanelNote" contentEditable="true"></div>
+                    </div>
+                    <div class="button" onclick="javascript:addNote()">Save</div>
+                </div>`
             }
+        }
+        function addNote(){
+            let note = document.getElementById("overPanelNote").innerText;
+            request("POST", `/api/addNote?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&noteStr=${encodeURIComponent(note)}`, function(rawRes){
+                if (rawRes == "success"){populateNotesSection(0, 9);closeOverPanel();}
+            });
+        }
+
+        function closeOverPanel(){
+            Elements.overPanel.style.display="none"
         }
 
         function startLoading(){
             var urlPath = window.location.pathname.split("/")
             Variables.pageUsername = urlPath[2]
-            populateProfileSection();populateNotesSection(0, 10);
+            populateProfileSection();populateNotesSection(0, 9);
         }startLoading();
     </script>
 </body>

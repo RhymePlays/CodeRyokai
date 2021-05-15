@@ -19,6 +19,13 @@ def usernameCharCheck(username):
             return False
     return True
 
+def strToIntCheck(string):
+    intChars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    for char in string:
+        if char not in intChars:
+            return False
+    return True
+
 def authCheck(username, password):
     if username in accounts:
         if accounts[username]["password"] == hashlib.sha256((password+hashSalt).encode("ascii")).hexdigest():
@@ -110,7 +117,7 @@ def getUserInfo():
             username = request.args["username"]
 
             if username in accounts:
-                return json.dumps({"username": username, "joined": accounts[username]['joined'], "entries": len(accounts[username]['notes']), "about": accounts[username]['about'], "following": len(accounts[username]['following']), "followers": len(accounts[username]['followers'])})
+                return {"username": username, "joined": accounts[username]['joined'], "entries": len(accounts[username]['notes']), "about": accounts[username]['about'], "following": len(accounts[username]['following']), "followers": len(accounts[username]['followers'])}
             else:
                 return "error"
         else:
@@ -134,8 +141,8 @@ def getUserNotes():
                         try:
                             returnValue.append(accounts[username]["notes"][index])
                         except:
-                            return json.dumps(returnValue)
-                    return json.dumps(returnValue)
+                            return returnValue
+                    return returnValue
                 except:
                     return "error"
             else:
@@ -154,7 +161,7 @@ def addNote():
             noteStr = request.args["noteStr"]
 
             if authCheck(username, password) and (len(noteStr) >= 1):
-                accounts[username]["notes"].insert(0 ,{"noteStr": noteStr, "time": time.time()})
+                accounts[username]["notes"].insert(0 ,{"noteStr": noteStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["notes"])}'})
                 return "success"
             else:
                 return "error"
@@ -199,6 +206,49 @@ def unfollowUser():
                     accounts[userToUnfollow]["followers"].remove(username)
                     return "success"
                 else: 
+                    return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/isFollowingUser", methods=["POST"])
+def isFollowingUser():
+    if request.method == "POST":
+        if ("username" in request.args) and ("password" in request.args) and ("userToCheck" in request.args):
+            username = request.args["username"]
+            password = request.args["password"]
+            userToCheck = request.args["userToCheck"]
+
+            if authCheck(username, password) and (userToCheck in accounts):
+                if userToCheck in accounts[username]["following"]:
+                    return "true"
+                else: 
+                    return "false"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/getNoteById", methods=["GET"])
+def getNoteById():
+    if request.method == "GET":
+        if "noteId" in request.args:
+            noteId = request.args["noteId"]
+
+            splitedNoteId = noteId.split("#")
+            if len(splitedNoteId) == 2:
+                if (splitedNoteId[0] in accounts) and strToIntCheck(splitedNoteId[1]):
+                    noteIndex = (len(accounts[splitedNoteId[0]]["notes"]) - int(splitedNoteId[1])) - 1
+                    if noteIndex >= 0:
+                        return accounts[splitedNoteId[0]]["notes"][noteIndex]
+                    else:
+                        return "error"
+                else:
                     return "error"
             else:
                 return "error"

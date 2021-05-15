@@ -6,16 +6,148 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Note</title>
-    <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Roboto&display=swap" rel="stylesheet">
+    
+    <style>
+        /*
+        Follow my scheme for the css.
+        And also, use proper comments to specify each section.
+        */
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #303030;
+            position: relative;
+            font-family: 'Roboto', Arial, Helvetica, sans-serif;
+            color: white;
+        }
+
+        /* G */
+
+        /* Global */
+        .button {
+            background-color: #1BADFF;
+            border-radius: 40px;
+            padding: 5px 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+            white-space: nowrap
+        }
+
+        .cVR {
+            height: auto;
+            width: 3px;
+            border-radius: 2.5px;
+            background-color: #303030;
+            margin: 0px 10px;
+        }
+
+        hr {
+            border: 1px #303030 solid ;
+            margin: 5px 10px;
+        }
+
+        .sectionBG {
+            background-color: #404040;
+            width: 900px;
+            border-radius: 15px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .sectionTop {
+            width: 100%;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .cH1 {
+            font-size: 25px;
+            font-weight: bold;
+            margin: 10px;
+            width: 100%;
+        }
+
+        /* TopBar */
+        #topBar {
+            background-color: #404040;
+            display: flex;
+            align-items: center;
+            height: 50px;
+        }
+        #logo {
+            margin-left: 10px;
+            min-height: 40px;
+            min-width: 40px;
+        }
+        #topName {
+            color: #25FFB1;
+            font-size: 25px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            width: 100%;
+            margin-left: 10px;
+        }
+
+        /* MainSection */
+        #mainSection {
+            margin: 10px 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ProfileSection */
+        .profileContainer {
+            display: flex;
+            margin: 10px;
+            font-size: 18px;
+        }
+        #followUnfollowButton{display: none;}
+
+        /* NoteSection */
+        .notesContainer{
+            display: flex;
+            flex-direction: row;
+        }
+        #notesRange{
+            color: #A0A0A0;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+        #addNoteButton{display: none;}
+        .noteItem{
+            display: flex;
+            margin: 10px;
+        }
+        .noteItemLeft{
+            height: auto;
+            width: 10px;
+            border-radius: 5px;
+            background: #1BADFF;
+            margin-right: 5px
+        }
+        .noteItemInfo{color: #A0A0A0;}
+        .noteItemText{
+            margin-top: 5px;
+            font-size: 20px;
+        }
+    </style>
+
 </head>
 
 <body>
     <div id="topBar">
         <div id="logo"></div>
         <div id="topName">Magic Notes</div>
-        <div class="button">Profile</div>
+        <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
     </div>
 
     <div id="mainSection">
@@ -23,64 +155,216 @@
         <div id="profileSection" class="sectionBG">
             <div class="sectionTop">
                 <div class="cH1">Profile</div>
-                <div class="button" id="followUnfollowButton">Follow</div>
+                <div class="button" id="followUnfollowButton" onclick="javascript:followUnfollowButton()">Follow</div>
             </div>
             <hr>
             <div class="profileContainer">
                 <div id="profileStatsSection">
-                    <div id="profileUsername">Name: Username</div>
-                    <div id="profileJoined">Joined: MM/DD/YYYY</div>
-                    <div id="profileEntries">Entries: 0</div>
-                    <div id="profileFollower">Followers: 0</div>
-                    <div id="profileFollowing">Following: 0</div>
+                    <div id="profileUsername"></div>
+                    <div id="profileJoined"></div>
+                    <div id="profileEntries"></div>
+                    <div id="profileFollower"></div>
+                    <div id="profileFollowing"></div>
                 </div>
                 <div class="cVR"></div>
-                <div class="profileBioSection">
-                    <b>Bio</b>
-                    <div id="profileBio">N/A</div>
+                <div class="profileAboutSection">
+                    <b>About</b>
+                    <div id="profileAbout"></div>
                 </div>
             </div>
         </div>
 
         <div id="notesSection" class="sectionBG">
             <div class="sectionTop">
-                <div class="cH1">Notes <span id="notesRange">(0-20)</span></div>
-                <div class="button" id="addNoteButton">Add Note</div>
+                <div class="cH1">Notes</div>
+                <div class="button" id="notesRangeLeft" onclick="javascript:notesRangeLeftButton()"><-</div>
+                <div id="notesRange">(0-0)</div>
+                <div class="button" id="notesRangeRight" onclick="javascript:notesRangeRightButton()">-></div>
+                <div class="button" id="addNoteButton" onclick="javascript:addNoteButton()">Add Note</div>
             </div>
             <hr>
-            <div id="notesContainer">
-
-                <div class="noteItem">
-                    <div class="noteItemLeft"></div>
-                    <div class="noteItemRight">
-                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
-                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
-                        <div class="noteItemText">This is where notes are gonna be shown, hopefully the final product will look good.</div>
-                    </div>
-                </div>
-
-                <div class="noteItem">
-                    <div class="noteItemLeft"></div>
-                    <div class="noteItemRight">
-                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
-                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
-                        <div class="noteItemText">Note text here.</div>
-                    </div>
-                </div>
-                <div class="noteItem">
-                    <div class="noteItemLeft"></div>
-                    <div class="noteItemRight">
-                        <div class="noteItemInfo">ID: UsernameStr#noteIndexInt</div>
-                        <div class="noteItemInfo">Time: MM/DD/YYYY at MM:HH %(24h)%</div>
-                        <div class="noteItemText">Note text here.</div>
-                    </div>
-                </div>
-                
-                <div class="button">Load More</div>
-                
-            </div>
+            <div id="notesContainer"></div>
         </div>
     </div>
+
+    <script>
+        var Elements = {
+            loginProfileButton: document.getElementById("loginProfileButton"),
+
+            profileUsername: document.getElementById("profileUsername"),
+            profileJoined: document.getElementById("profileJoined"),
+            profileEntries: document.getElementById("profileEntries"),
+            profileFollower: document.getElementById("profileFollower"),
+            profileFollowing: document.getElementById("profileFollowing"),
+            profileAbout: document.getElementById("profileAbout"),
+            followUnfollowButton: document.getElementById("followUnfollowButton"),
+
+            notesRange: document.getElementById("notesRange"),
+            addNoteButton: document.getElementById("addNoteButton"),
+            notesContainer: document.getElementById("notesContainer"),
+        }
+        var Variables = {
+            loggedIn: false,
+            username: "",
+            password: "",
+            pageUsername: "",
+            followButtonAction: true,
+            pageEntries: 0,
+            fromIndex: 0,
+            toIndex: 0,
+        }
+
+        // Function
+        function request(method, val, func){
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                func(req.responseText)
+                }
+            };
+            req.open(method, val, true);
+            req.send();
+        }
+
+        function populateProfileSection(){
+            request("GET", `/api/getUserInfo?username=${encodeURIComponent(Variables.pageUsername)}`, function(rawRes){
+                if (rawRes != "error"){
+                    let res = JSON.parse(rawRes);
+                    Variables.pageEntries = res.entries;
+
+                    let time = new Date(0);time.setUTCSeconds(res.joined);
+                    let [month, date, year] = time.toLocaleDateString("en-US").split("/");
+            
+                    Elements.profileUsername.innerText = `Name: ${res.username}`;
+                    Elements.profileJoined.innerText = `Joined: ${month}/${date}/${year}`;
+                    Elements.profileEntries.innerText = `Entries: ${res.entries}`;
+                    Elements.profileFollower.innerText = `Followers: ${res.followers}`;
+                    Elements.profileFollowing.innerText = `Following: ${res.following}`;
+                    Elements.profileAbout.innerText = res.about;
+
+                    if (Variables.loggedIn){
+                        request("POST", `/api/isFollowingUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToCheck=${encodeURIComponent(Variables.pageUsername)}`, function(isFollowingUser){
+                            if (isFollowingUser=="false"){
+                                Variables.followButtonAction=true
+                                Elements.followUnfollowButton.style.display="block";
+                                Elements.followUnfollowButton.style.backgroundColor="#1BADFF";
+                                Elements.followUnfollowButton.innerText="Follow";
+                            }else if(isFollowingUser=="true"){
+                                Variables.followButtonAction=false
+                                Elements.followUnfollowButton.style.display="block";
+                                Elements.followUnfollowButton.style.backgroundColor="#FB1E46";
+                                Elements.followUnfollowButton.innerText="Unfollow";
+                            }
+                        });
+                    }
+
+                }
+            });
+        }
+
+        function populateNotesSection(fromIndex, toIndex){
+            request("GET", `/api/getUserNotes?username=${encodeURIComponent(Variables.pageUsername)}&fromIndex=${encodeURIComponent(fromIndex)}&toIndex=${encodeURIComponent(toIndex)}`, function(rawRes){
+                if (rawRes != "error"){
+                    let res = JSON.parse(rawRes);
+                    Variables.fromIndex=fromIndex;Variables.toIndex=toIndex;
+
+                    Elements.notesRange.innerText = `(${fromIndex}-${toIndex})`;
+
+                    if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                        Elements.addNoteButton.style.display="block";
+                    }else{
+                        Elements.addNoteButton.style.display="none";
+                    }
+                
+                    Elements.notesContainer.textContent = '';
+                    for (noteIndex in res){
+                        let time = new Date(0);time.setUTCSeconds(res[noteIndex].time);
+                        let [month, date, year] = time.toLocaleDateString("en-US").split("/");
+                        let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
+                
+                        let noteItem = document.createElement("div");
+                        noteItem.className = "noteItem";
+                    
+                        let noteItemLeft = document.createElement("div");
+                        noteItemLeft.className = "noteItemLeft";
+                        let noteItemRight = document.createElement("div");
+                        noteItemRight.className = "noteItemRight";
+                        
+                        let noteItemId = document.createElement("div");
+                        noteItemId.className = "noteItemInfo";
+                        noteItemId.innerText = `Id: ${res[noteIndex].id}`;
+                        let noteItemTime = document.createElement("div");
+                        noteItemTime.className = "noteItemInfo";
+                        noteItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
+                        let noteItemText = document.createElement("div");
+                        noteItemText.className = "noteItemText";
+                        noteItemText.innerText = res[noteIndex].noteStr;
+                    
+                        noteItemRight.append(noteItemId, noteItemTime, noteItemText);
+                        noteItem.append(noteItemLeft, noteItemRight);
+                        Elements.notesContainer.append(noteItem);
+                    }
+
+                }
+            });
+        }
+
+        function loginProfileButton(){
+            if (Variables.loggedIn == false){
+                let username = prompt("Username");
+                let password = prompt("Password");
+                request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
+                    if (rawRes == "success"){
+                        Variables.loggedIn=true;
+                        Variables.username=username;
+                        Variables.password=password;
+
+                        Elements.loginProfileButton.innerText = "Profile"
+                        populateProfileSection();populateNotesSection(Variables.fromIndex, Variables.toIndex)
+                    }
+                });
+            }else{/*profile code here*/}
+        }
+
+        function followUnfollowButton(){
+            if (Variables.loggedIn == true){
+                if(Variables.followButtonAction==true){
+                    request("POST", `/api/followUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToFollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
+                    populateProfileSection()
+                }else{
+                    request("POST", `/api/unfollowUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToUnfollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
+                    populateProfileSection()
+                }
+            };
+        }
+
+        function notesRangeLeftButton(){
+            let diff = 10;
+            if (Variables.fromIndex-diff >= 0){
+                populateNotesSection((Variables.fromIndex-diff), (Variables.toIndex-diff));
+            }
+        }
+        function notesRangeRightButton(){
+            let diff = 10;
+            if (Variables.fromIndex <= Variables.pageEntries-1){
+                populateNotesSection((Variables.fromIndex+diff), (Variables.toIndex+diff));
+            }
+        }
+
+        function addNoteButton(){
+            if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                request("POST", `/api/addNote?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&noteStr=${encodeURIComponent(prompt("Note:"))}`, function(rawRes){
+                    if (rawRes == "success"){populateNotesSection(0, 10);}
+                });
+            }
+        }
+
+        function startLoading(){
+            var urlPath = window.location.pathname.split("/")
+            Variables.pageUsername = urlPath[2]
+            populateProfileSection();populateNotesSection(0, 10);
+        }startLoading();
+    </script>
 </body>
 
 </html>

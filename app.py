@@ -10,6 +10,7 @@ hashSalt = "Ryokai+LongLiveMyAnimeWaifus"
 allowedUsernameChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", "."]
 accounts = {}
 autoSave = True
+webUI = ""
 
 # Function
 def usernameCharCheck(username):
@@ -54,7 +55,15 @@ def autoSaveDatabase():
         except:
             print("Failed to auto-save database "+str(time.time()))
 
-# Routes
+def loadWebUI():
+    global webUI
+    try:
+        with open("index.html", "r") as f:
+            webUI = f.read()
+    except:
+        print("Failed to load webUI")
+
+# API Routes
 @app.route("/")
 def root():
     return "<h2>Konnichiwa Sekai</h2><p>Welcome to Magic Notes</p>"
@@ -70,6 +79,20 @@ def saveDatabase(code):
             return "error"
     else:
         return "error"
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    if (request.method == "POST") and ("username" in request.args) and ("password" in request.args):
+        username = request.args["username"]
+        password = request.args["password"]
+
+        if authCheck(username, password):
+            return "success"
+        else:
+            return "error2"
+    else:
+        return "error1"
+
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
@@ -141,8 +164,8 @@ def getUserNotes():
                         try:
                             returnValue.append(accounts[username]["notes"][index])
                         except:
-                            return returnValue
-                    return returnValue
+                            return json.dumps(returnValue)
+                    return json.dumps(returnValue)
                 except:
                     return "error"
             else:
@@ -257,8 +280,16 @@ def getNoteById():
     else:
         return "error"
 
+# UI Routes
+@app.route("/user/<username>", methods=["GET", "POST"])
+def userPage(username):
+    if username in accounts:
+        return webUI
+    else:
+        return "User not found"
+
 # Starting Point
 if __name__ == "__main__":
-    loadDatabase()
+    loadDatabase();loadWebUI()
     savingThread = threading.Thread(target=autoSaveDatabase);savingThread.start()
     app.run(port=80, debug=True)

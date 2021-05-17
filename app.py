@@ -58,7 +58,7 @@ def autoSaveDatabase():
 def loadWebUI():
     global webUI
     try:
-        with open("index.html", "r") as f:
+        with open("pages/index.html", "r") as f:
             webUI = f.read()
     except:
         print("Failed to load webUI")
@@ -66,7 +66,7 @@ def loadWebUI():
 # API Routes
 @app.route("/")
 def root():
-    return "<h2>Konnichiwa Sekai</h2><p>Welcome to Magic Notes</p>"
+    return "<h2>Konnichiwa Sekai</h2><p>Welcome to Magic Posts</p>"
 
 @app.route("/saveData/<code>", methods=["GET"])
 def saveDatabase(code):
@@ -104,7 +104,7 @@ def signup():
 
             if usernameCharCheck(username) and (username not in accounts) and (len(username) >= 4) and (len(username) <= 18) and (len(email) > 1) and (len(email) <= 320):
                 if len(password) >= 8 and len(password) <= 64:
-                    accounts[username] = {"password": hashlib.sha256((password+hashSalt).encode("ascii")).hexdigest(), "email": email, "joined": time.time(), "notes": [], "following": [], "followers": [], "about": ""}
+                    accounts[username] = {"password": hashlib.sha256((password+hashSalt).encode("ascii")).hexdigest(), "email": email, "joined": time.time(), "posts": [], "following": [], "followers": [], "about": ""}
                     return "success"
                 else:
                     return "error"
@@ -140,7 +140,7 @@ def getUserInfo():
             username = request.args["username"]
 
             if username in accounts:
-                return {"username": username, "joined": accounts[username]['joined'], "entries": len(accounts[username]['notes']), "about": accounts[username]['about'], "following": len(accounts[username]['following']), "followers": len(accounts[username]['followers'])}
+                return {"username": username, "joined": accounts[username]['joined'], "entries": len(accounts[username]['posts']), "about": accounts[username]['about'], "following": len(accounts[username]['following']), "followers": len(accounts[username]['followers'])}
             else:
                 return "error"
         else:
@@ -148,8 +148,8 @@ def getUserInfo():
     else:
         return "error"
 
-@app.route("/api/getUserNotes", methods=["GET"])
-def getUserNotes():
+@app.route("/api/getUserPosts", methods=["GET"])
+def getUserPosts():
     if request.method == "GET":
         if ("username" in request.args) and ("fromIndex" in request.args) and ("toIndex" in request.args):
             username = request.args["username"]
@@ -162,7 +162,7 @@ def getUserNotes():
                     returnValue=[]
                     for index in range(fromIndex, toIndex):
                         try:
-                            returnValue.append(accounts[username]["notes"][index])
+                            returnValue.append(accounts[username]["posts"][index])
                         except:
                             return json.dumps(returnValue)
                     return json.dumps(returnValue)
@@ -175,16 +175,16 @@ def getUserNotes():
     else:
         return "error"
 
-@app.route("/api/addNote", methods=["POST"])
-def addNote():
+@app.route("/api/addPost", methods=["POST"])
+def addPost():
     if request.method == "POST":
-        if ("username" in request.args) and ("password" in request.args) and ("noteStr" in request.args):
+        if ("username" in request.args) and ("password" in request.args) and ("postStr" in request.args):
             username = request.args["username"]
             password = request.args["password"]
-            noteStr = request.args["noteStr"]
+            postStr = request.args["postStr"]
 
-            if authCheck(username, password) and (len(noteStr) >= 1):
-                accounts[username]["notes"].insert(0 ,{"noteStr": noteStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["notes"])}'})
+            if authCheck(username, password) and (len(postStr) >= 1):
+                accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}'})
                 return "success"
             else:
                 return "error"
@@ -257,18 +257,18 @@ def isFollowingUser():
     else:
         return "error"
 
-@app.route("/api/getNoteById", methods=["GET"])
-def getNoteById():
+@app.route("/api/getPostById", methods=["GET"])
+def getPostById():
     if request.method == "GET":
-        if "noteId" in request.args:
-            noteId = request.args["noteId"]
+        if "postId" in request.args:
+            postId = request.args["postId"]
 
-            splitedNoteId = noteId.split("#")
-            if len(splitedNoteId) == 2:
-                if (splitedNoteId[0] in accounts) and strToIntCheck(splitedNoteId[1]):
-                    noteIndex = (len(accounts[splitedNoteId[0]]["notes"]) - int(splitedNoteId[1])) - 1
-                    if noteIndex >= 0:
-                        return accounts[splitedNoteId[0]]["notes"][noteIndex]
+            splitedPostId = postId.split("#")
+            if len(splitedPostId) == 2:
+                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
+                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+                    if postIndex >= 0:
+                        return accounts[splitedPostId[0]]["posts"][postIndex]
                     else:
                         return "error"
                 else:

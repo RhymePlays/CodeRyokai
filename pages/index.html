@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Note</title>
+    <title>Magic Post</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Roboto&display=swap" rel="stylesheet">
     
@@ -143,30 +143,30 @@
         #followUnfollowButton{display: none;}
         #editAboutButton{display: none;margin: 0px 10px;color: #1BADFF;cursor: pointer;}
 
-        /* NoteSection */
-        .notesContainer{
+        /* PostSection */
+        .postsContainer{
             display: flex;
             flex-direction: row;
         }
-        #notesRange{
+        #postsRange{
             color: #A0A0A0;
             font-weight: normal;
             white-space: nowrap;
         }
-        #addNoteButton{display: none;}
-        .noteItem{
+        #addPostButton{display: none;}
+        .postItem{
             display: flex;
             margin: 10px;
         }
-        .noteItemLeft{
+        .postItemLeft{
             height: auto;
             width: 10px;
             border-radius: 5px;
             background: #1BADFF;
             margin-right: 5px
         }
-        .noteItemInfo{color: #A0A0A0;}
-        .noteItemText{
+        .postItemInfo{color: #A0A0A0;}
+        .postItemText{
             margin-top: 5px;
             font-size: 20px;
         }
@@ -177,7 +177,7 @@
 <body>
     <div id="topBar">
         <div id="logo"></div>
-        <div id="topName">Magic Notes</div>
+        <div id="topName">Magic Posts</div>
         <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
     </div>
     
@@ -207,16 +207,16 @@
             </div>
         </div>
 
-        <div id="notesSection" class="sectionBG">
+        <div id="postsSection" class="sectionBG">
             <div class="sectionTop">
-                <div class="cH1">Notes</div>
-                <div class="button" id="notesRangeLeft" onclick="javascript:notesRangeLeftButton()"><-</div>
-                <div id="notesRange">(0-0)</div>
-                <div class="button" id="notesRangeRight" onclick="javascript:notesRangeRightButton()">-></div>
-                <div class="button" id="addNoteButton" onclick="javascript:addNoteButton()">Add Note</div>
+                <div class="cH1">Posts</div>
+                <div class="button" id="postsRangeLeft" onclick="javascript:postsRangeLeftButton()"><-</div>
+                <div id="postsRange">(0-0)</div>
+                <div class="button" id="postsRangeRight" onclick="javascript:postsRangeRightButton()">-></div>
+                <div class="button" id="addPostButton" onclick="javascript:addPostButton()">Add Post</div>
             </div>
             <hr>
-            <div id="notesContainer"></div>
+            <div id="postsContainer"></div>
         </div>
 
     </div>
@@ -234,9 +234,9 @@
             profileAbout: document.getElementById("profileAbout"),
             followUnfollowButton: document.getElementById("followUnfollowButton"),
 
-            notesRange: document.getElementById("notesRange"),
-            addNoteButton: document.getElementById("addNoteButton"),
-            notesContainer: document.getElementById("notesContainer"),
+            postsRange: document.getElementById("postsRange"),
+            addPostButton: document.getElementById("addPostButton"),
+            postsContainer: document.getElementById("postsContainer"),
             
             overPanel: document.getElementById("overPanel"),
 
@@ -306,47 +306,47 @@
             });
         }
 
-        function populateNotesSection(fromIndex, toIndex){
-            request("GET", `/api/getUserNotes?username=${encodeURIComponent(Variables.pageUsername)}&fromIndex=${encodeURIComponent(fromIndex)}&toIndex=${encodeURIComponent(toIndex)}`, function(rawRes){
+        function populatePostsSection(fromIndex, toIndex){
+            request("GET", `/api/getUserPosts?username=${encodeURIComponent(Variables.pageUsername)}&fromIndex=${encodeURIComponent(fromIndex)}&toIndex=${encodeURIComponent(toIndex)}`, function(rawRes){
                 if (rawRes != "error"){
                     let res = JSON.parse(rawRes);
                     Variables.fromIndex=fromIndex;Variables.toIndex=toIndex;
 
-                    Elements.notesRange.innerText = `(${fromIndex}-${toIndex})`;
+                    Elements.postsRange.innerText = `(${fromIndex}-${toIndex})`;
 
                     if (Variables.loggedIn && Variables.pageUsername==Variables.username){
-                        Elements.addNoteButton.style.display="block";
+                        Elements.addPostButton.style.display="block";
                     }else{
-                        Elements.addNoteButton.style.display="none";
+                        Elements.addPostButton.style.display="none";
                     }
                 
-                    Elements.notesContainer.textContent = '';
-                    for (noteIndex in res){
-                        let time = new Date(0);time.setUTCSeconds(res[noteIndex].time);
+                    Elements.postsContainer.textContent = '';
+                    for (postIndex in res){
+                        let time = new Date(0);time.setUTCSeconds(res[postIndex].time);
                         let [month, date, year] = time.toLocaleDateString("en-US").split("/");
                         let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
                 
-                        let noteItem = document.createElement("div");
-                        noteItem.className = "noteItem";
+                        let postItem = document.createElement("div");
+                        postItem.className = "postItem";
                     
-                        let noteItemLeft = document.createElement("div");
-                        noteItemLeft.className = "noteItemLeft";
-                        let noteItemRight = document.createElement("div");
-                        noteItemRight.className = "noteItemRight";
+                        let postItemLeft = document.createElement("div");
+                        postItemLeft.className = "postItemLeft";
+                        let postItemRight = document.createElement("div");
+                        postItemRight.className = "postItemRight";
                         
-                        let noteItemId = document.createElement("div");
-                        noteItemId.className = "noteItemInfo";
-                        noteItemId.innerText = `Id: ${res[noteIndex].id}`;
-                        let noteItemTime = document.createElement("div");
-                        noteItemTime.className = "noteItemInfo";
-                        noteItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
-                        let noteItemText = document.createElement("div");
-                        noteItemText.className = "noteItemText";
-                        noteItemText.innerText = res[noteIndex].noteStr;
+                        let postItemId = document.createElement("div");
+                        postItemId.className = "postItemInfo";
+                        postItemId.innerText = `Id: ${res[postIndex].id}`;
+                        let postItemTime = document.createElement("div");
+                        postItemTime.className = "postItemInfo";
+                        postItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
+                        let postItemText = document.createElement("div");
+                        postItemText.className = "postItemText";
+                        postItemText.innerText = res[postIndex].postStr;
                     
-                        noteItemRight.append(noteItemId, noteItemTime, noteItemText);
-                        noteItem.append(noteItemLeft, noteItemRight);
-                        Elements.notesContainer.append(noteItem);
+                        postItemRight.append(postItemId, postItemTime, postItemText);
+                        postItem.append(postItemLeft, postItemRight);
+                        Elements.postsContainer.append(postItem);
                     }
 
                 }
@@ -386,7 +386,7 @@
                     Variables.password=password;
     
                     Elements.loginProfileButton.innerText = "Profile"
-                    populateProfileSection();populateNotesSection(Variables.fromIndex, Variables.toIndex);closeOverPanel()
+                    populateProfileSection();populatePostsSection(Variables.fromIndex, Variables.toIndex);closeOverPanel()
                 }
             });
         }
@@ -436,40 +436,40 @@
             });
         }
 
-        function notesRangeLeftButton(){
+        function postsRangeLeftButton(){
             let diff = 10;
             if (Variables.fromIndex-diff >= 0){
-                populateNotesSection((Variables.fromIndex-diff), (Variables.toIndex-diff));
+                populatePostsSection((Variables.fromIndex-diff), (Variables.toIndex-diff));
             }
         }
-        function notesRangeRightButton(){
+        function postsRangeRightButton(){
             let diff = 10;
             if (Variables.fromIndex < Variables.pageEntries-1){
-                populateNotesSection((Variables.fromIndex+diff), (Variables.toIndex+diff));
+                populatePostsSection((Variables.fromIndex+diff), (Variables.toIndex+diff));
             }
         }
 
-        function addNoteButton(){
+        function addPostButton(){
             if (Variables.loggedIn && Variables.pageUsername==Variables.username){
                 Elements.overPanel.style.display="flex"
                 Elements.overPanel.innerHTML=`
                 <div class="sectionBG">
                     <div class="sectionTop">
-                        <div class="cH1">Add Note</div>
+                        <div class="cH1">Add Post</div>
                         <div class="button" onclick="javascript:closeOverPanel()">Close</div>
                     </div>
                     <hr>
                     <div class="overPanelInnerSection">
-                        <div class="CInput" id="overPanelNote" contentEditable="true"></div>
+                        <div class="CInput" id="overPanelPost" contentEditable="true"></div>
                     </div>
-                    <div class="button" onclick="javascript:addNote()">Save</div>
+                    <div class="button" onclick="javascript:addPost()">Save</div>
                 </div>`
             }
         }
-        function addNote(){
-            let note = document.getElementById("overPanelNote").innerText;
-            request("POST", `/api/addNote?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&noteStr=${encodeURIComponent(note)}`, function(rawRes){
-                if (rawRes == "success"){populateNotesSection(0, 9);closeOverPanel();}
+        function addPost(){
+            let post = document.getElementById("overPanelPost").innerText;
+            request("POST", `/api/addPost?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&postStr=${encodeURIComponent(post)}`, function(rawRes){
+                if (rawRes == "success"){populatePostsSection(0, 9);closeOverPanel();}
             });
         }
 
@@ -480,7 +480,7 @@
         function startLoading(){
             var urlPath = window.location.pathname.split("/")
             Variables.pageUsername = urlPath[2]
-            populateProfileSection();populateNotesSection(0, 9);
+            populateProfileSection();populatePostsSection(0, 9);
         }startLoading();
     </script>
 </body>

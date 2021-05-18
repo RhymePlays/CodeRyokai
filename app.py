@@ -1,6 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, render_template_string
 import time, json, hashlib, threading
-# from markupsafe import escape
+from markupsafe import Markup
 
 # Initing Flask
 app = Flask(__name__)
@@ -9,9 +9,8 @@ app = Flask(__name__)
 hashSalt = "Ryokai+LongLiveMyAnimeWaifus"
 allowedUsernameChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", "."]
 accounts = {}
+webUI = {}
 autoSave = True
-
-webUI = {"userPage": "", "404Page": ""}
 
 # Function
 def usernameCharCheck(username):
@@ -56,18 +55,13 @@ def autoSaveDatabase():
         except:
             print("Failed to auto-save database "+str(time.time()))
 
-def loadWebUI():
-    try:
-        with open("pages/user.html", "r") as f:
-            webUI["userPage"] = f.read()
-    except:
-        print("Failed to load userPage")
-
-    try:
-        with open("pages/404.html", "r") as f:
-            webUI["404Page"] = f.read()
-    except:
-        print("Failed to load 404Page")
+def loadWebUI(pageLoadQueue):
+    for page in pageLoadQueue:
+        try:
+            with open(page["fileLoc"], "r") as f:
+                webUI[page["pageTag"]] = f.read()
+        except:
+            print("Failed to load "+str(page["pageTag"]))
 
 # API Routes
 @app.route("/api/saveData/<code>", methods=["GET"])
@@ -285,21 +279,21 @@ def getPostById():
 # UI Routes
 @app.errorhandler(404)
 def error404Page(e):
-    return webUI["404Page"]
+    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
 
 @app.route("/")
 def root():
-    return "<body style=\"font-family: 'Roboto', Arial\"><h2>Konnichiwa Sekai</h2><p>Welcome to CodeRyokai</p></body>"
+    return render_template_string(webUI["basePage"], mainSection = Markup("""<div class="sectionBG"><div class="sectionTop"><div class="cH1">Konnichiwa Sekai</div></div><hr><div style="margin: 10px">Welcome to CodeRyokai</div></div>"""))
 
 @app.route("/user/<username>", methods=["GET", "POST"])
 def userPage(username):
     if username in accounts:
-        return webUI["userPage"]
+        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["userPage"]))
     else:
-        return webUI["404Page"]
+        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
 
 # Starting Point
 if __name__ == "__main__":
-    loadDatabase();loadWebUI()
+    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
     savingThread = threading.Thread(target=autoSaveDatabase);savingThread.start()
     app.run(port=80, debug=True)

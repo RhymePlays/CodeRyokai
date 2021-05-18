@@ -10,7 +10,8 @@ hashSalt = "Ryokai+LongLiveMyAnimeWaifus"
 allowedUsernameChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", "."]
 accounts = {}
 autoSave = True
-webUI = ""
+
+webUI = {"userPage": "", "404Page": ""}
 
 # Function
 def usernameCharCheck(username):
@@ -56,19 +57,20 @@ def autoSaveDatabase():
             print("Failed to auto-save database "+str(time.time()))
 
 def loadWebUI():
-    global webUI
     try:
-        with open("pages/index.html", "r") as f:
-            webUI = f.read()
+        with open("pages/user.html", "r") as f:
+            webUI["userPage"] = f.read()
     except:
-        print("Failed to load webUI")
+        print("Failed to load userPage")
+
+    try:
+        with open("pages/404.html", "r") as f:
+            webUI["404Page"] = f.read()
+    except:
+        print("Failed to load 404Page")
 
 # API Routes
-@app.route("/")
-def root():
-    return "<h2>Konnichiwa Sekai</h2><p>Welcome to Magic Posts</p>"
-
-@app.route("/saveData/<code>", methods=["GET"])
+@app.route("/api/saveData/<code>", methods=["GET"])
 def saveDatabase(code):
     if code == "LongLiveMyAnimeWaifus":
         try:
@@ -281,12 +283,20 @@ def getPostById():
         return "error"
 
 # UI Routes
+@app.errorhandler(404)
+def error404Page(e):
+    return webUI["404Page"]
+
+@app.route("/")
+def root():
+    return "<body style=\"font-family: 'Roboto', Arial\"><h2>Konnichiwa Sekai</h2><p>Welcome to CodeRyokai</p></body>"
+
 @app.route("/user/<username>", methods=["GET", "POST"])
 def userPage(username):
     if username in accounts:
-        return webUI
+        return webUI["userPage"]
     else:
-        return "User not found"
+        return webUI["404Page"]
 
 # Starting Point
 if __name__ == "__main__":

@@ -100,7 +100,7 @@ def signup():
 
             if usernameCharCheck(username) and (username not in accounts) and (len(username) >= 4) and (len(username) <= 18) and (len(email) > 1) and (len(email) <= 320):
                 if len(password) >= 8 and len(password) <= 64:
-                    accounts[username] = {"password": hashlib.sha256((password+hashSalt).encode("ascii")).hexdigest(), "email": email, "joined": time.time(), "posts": [], "following": [], "followers": [], "about": ""}
+                    accounts[username] = {"password": hashlib.sha256((password+hashSalt).encode("ascii")).hexdigest(), "email": email, "joined": time.time(), "posts": [], "following": [], "followers": [], "about": "", "likes": [], "comments": []}
                     return "success"
                 else:
                     return "error"
@@ -180,7 +180,7 @@ def addPost():
             postStr = request.args["postStr"]
 
             if authCheck(username, password) and (len(postStr) >= 1):
-                accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}'})
+                accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": []})
                 return "success"
             else:
                 return "error"
@@ -265,6 +265,90 @@ def getPostById():
                     postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
                     if postIndex >= 0:
                         return accounts[splitedPostId[0]]["posts"][postIndex]
+                    else:
+                        return "error"
+                else:
+                    return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/likePost", methods=["POST"])
+def likePost():
+    if request.method == "POST":
+        if ("username" in request.args) and ("password" in request.args) and ("postId" in request.args):
+            username = request.args["username"]
+            password = request.args["password"]
+            postId = request.args["postId"]
+
+            splitedPostId = postId.split("#")
+            if authCheck(username, password) and len(splitedPostId) == 2:
+                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]) and (postId not in accounts[username]["likes"]):
+                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+                    if postIndex >= 0:
+                        accounts[splitedPostId[0]]["posts"][postIndex]["likes"].append(username)
+                        accounts[username]["likes"].append(postId)
+                        return "success"
+                    else:
+                        return "error"
+                else:
+                    return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/unlikePost", methods=["POST"])
+def unlikePost():
+    if request.method == "POST":
+        if ("username" in request.args) and ("password" in request.args) and ("postId" in request.args):
+            username = request.args["username"]
+            password = request.args["password"]
+            postId = request.args["postId"]
+
+            splitedPostId = postId.split("#")
+            if authCheck(username, password) and len(splitedPostId) == 2:
+                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]) and (postId in accounts[username]["likes"]):
+                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+                    if postIndex >= 0:
+                        accounts[splitedPostId[0]]["posts"][postIndex]["likes"].remove(username)
+                        accounts[username]["likes"].remove(postId)
+                        return "success"
+                    else:
+                        return "error"
+                else:
+                    return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/comment", methods=["POST"])
+def comment():
+    if request.method == "POST":
+        if ("username" in request.args) and ("password" in request.args) and ("postId" in request.args) and ("commentStr" in request.args):
+            username = request.args["username"]
+            password = request.args["password"]
+            postId = request.args["postId"]
+            commentStr = request.args["commentStr"]
+
+            splitedPostId = postId.split("#")
+            if authCheck(username, password) and len(splitedPostId) == 2 and (len(commentStr) >= 1):
+                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
+                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+                    if postIndex >= 0:
+                        accounts[username]["posts"].insert(0 ,{"postStr": commentStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": []})
+
+                        accounts[splitedPostId[0]]["posts"][postIndex]["comments"].append(f'{username}#{len(accounts[username]["posts"])}')
+                        accounts[username]["comments"].append({"commentOn": postId, "comment": f'{username}#{len(accounts[username]["posts"])}'})
+                        return "success"
                     else:
                         return "error"
                 else:

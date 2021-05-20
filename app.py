@@ -64,6 +64,11 @@ def loadWebUI(pageLoadQueue):
             print("Failed to load "+str(page["pageTag"]))
 
 # API Routes
+@app.route("/ping", methods=["GET", "POST"])
+def ping():
+    return "pong"
+
+
 @app.route("/api/saveData/<code>", methods=["GET"])
 def saveDatabase(code):
     if code == "LongLiveMyAnimeWaifus":
@@ -158,7 +163,7 @@ def getUserPosts():
                     returnValue=[]
                     for index in range(fromIndex, toIndex):
                         try:
-                            returnValue.append(accounts[username]["posts"][index])
+                            returnValue.append({"postStr": accounts[username]["posts"][index]["postStr"], "time": accounts[username]["posts"][index]["time"], "id": accounts[username]["posts"][index]["id"], "likes": len(accounts[username]["posts"][index]["likes"]), "comments": len(accounts[username]["posts"][index]["comments"])})
                         except:
                             return json.dumps(returnValue)
                     return json.dumps(returnValue)
@@ -180,7 +185,7 @@ def addPost():
             postStr = request.args["postStr"]
 
             if authCheck(username, password) and (len(postStr) >= 1):
-                accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": []})
+                accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": [], "isCommentTo": None})
                 return "success"
             else:
                 return "error"
@@ -264,7 +269,7 @@ def getPostById():
                 if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
                     postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
                     if postIndex >= 0:
-                        return accounts[splitedPostId[0]]["posts"][postIndex]
+                        return {"postStr": accounts[splitedPostId[0]]["posts"][postIndex]["postStr"], "time": accounts[splitedPostId[0]]["posts"][postIndex]["time"], "id": accounts[splitedPostId[0]]["posts"][postIndex]["id"], "likes": len(accounts[splitedPostId[0]]["posts"][postIndex]["likes"]), "comments": len(accounts[splitedPostId[0]]["posts"][postIndex]["comments"])}
                     else:
                         return "error"
                 else:
@@ -344,10 +349,12 @@ def comment():
                 if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
                     postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
                     if postIndex >= 0:
-                        accounts[username]["posts"].insert(0 ,{"postStr": commentStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": []})
+                        commentId = f'{username}#{len(accounts[username]["posts"])}'
 
-                        accounts[splitedPostId[0]]["posts"][postIndex]["comments"].append(f'{username}#{len(accounts[username]["posts"])}')
-                        accounts[username]["comments"].append({"commentOn": postId, "comment": f'{username}#{len(accounts[username]["posts"])}'})
+                        accounts[username]["posts"].insert(0, {"postStr": commentStr, "time": time.time(), "id": commentId, "likes": [], "comments": [], "isCommentTo": postId})
+
+                        accounts[splitedPostId[0]]["posts"][postIndex+1]["comments"].append(commentId)
+                        accounts[username]["comments"].append({"commentOn": postId, "comment": commentId})
                         return "success"
                     else:
                         return "error"
@@ -365,7 +372,7 @@ def comment():
 def error404Page(e):
     return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def root():
     return render_template_string(webUI["basePage"], mainSection = Markup("""<div class="sectionBG"><div class="sectionTop"><div class="cH1">Konnichiwa Sekai</div></div><hr><div style="margin: 10px">Welcome to CodeRyokai</div></div>"""))
 

@@ -139,45 +139,11 @@
             margin: 10px;
         }
 
-        /* ProfileSection */
-        .profileContainer {
-            display: flex;
-            margin: 10px;
-            font-size: 18px;
-        }
-
-        #followUnfollowButton {
-            display: none;
-        }
-
-        #editAboutButton {
-            display: none;
-            margin: 0px 10px;
-            color: #1BADFF;
-            cursor: pointer;
-        }
-
-        /* PostSection */
-        .postsContainer {
-            display: flex;
-            flex-direction: row;
-        }
-
-        #postsRange {
-            color: #A0A0A0;
-            font-weight: normal;
-            white-space: nowrap;
-        }
-
-        #addPostButton {
-            display: none;
-        }
-
+        /* PostItem */
         .postItem {
             display: flex;
             margin: 10px;
         }
-
         .postItemLeft {
             height: auto;
             width: 10px;
@@ -185,11 +151,9 @@
             background: #1BADFF;
             margin-right: 5px
         }
-
         .postItemInfo {
             color: #A0A0A0;
         }
-
         .postItemText {
             margin-top: 5px;
             font-size: 20px;
@@ -199,6 +163,98 @@
 </head>
 
 <body>
+    <script>
+        function request(method, val, func){
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                func(req.responseText)
+                }
+            };
+            req.open(method, val, true);
+            req.send();
+        }
+
+        function loginProfileButton(){
+            if (globalVars.loggedIn == false){
+                globalElems.overPanel.style.display="flex"
+                globalElems.overPanel.innerHTML=`
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Login</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        Username
+                        <div class="CInput" id="overPanelUsername" contentEditable="true"></div>
+                        Password
+                        <div class="CInput" id="overPanelPassword" contentEditable="true"></div>
+                        Email (Only when Signing Up)
+                        <div class="CInput" id="overPanelEmail" contentEditable="true"></div>
+                    </div>
+                    <div class="button" onclick="javascript:login()">Login</div>
+                    <div class="button" onclick="javascript:signup()">Signup</div>
+                </div>`
+            }else{window.location.href = "/user/"+globalVars.username}
+        }
+        function login(){
+            let username = document.getElementById("overPanelUsername").innerText;
+            let password = document.getElementById("overPanelPassword").innerText;
+            request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
+                if (rawRes == "success"){
+                    globalVars.loggedIn=true;
+                    globalVars.username=username;
+                    globalVars.password=password;
+                    
+                    globalElems.loginProfileButton.innerText = "Profile";
+                    try{postLogin();}catch(e){console.log("DEBUG: Warning post-login action not set on this page", "color: yellow;")}
+                    closeOverPanel()
+                }
+            });
+        }
+        function signup(){
+            let username = document.getElementById("overPanelUsername").innerText;
+            let password = document.getElementById("overPanelPassword").innerText;
+            let email = document.getElementById("overPanelEmail").innerText;
+            request("POST", `/api/signup?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`, (rawRes)=>{
+                if (rawRes == "success"){login();}
+            });
+        }
+
+        function closeOverPanel(){
+            globalElems.overPanel.style.display="none"
+        }
+
+        function createChatItem(postId, Rawtime, postStr){
+            let time = new Date(0);time.setUTCSeconds(Rawtime);
+            let [month, date, year] = time.toLocaleDateString("en-US").split("/");
+            let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
+
+            let postItem = document.createElement("div");
+            postItem.className = "postItem";
+        
+            let postItemLeft = document.createElement("div");
+            postItemLeft.className = "postItemLeft";
+            let postItemRight = document.createElement("div");
+            postItemRight.className = "postItemRight";
+            
+            let postItemId = document.createElement("div");
+            postItemId.className = "postItemInfo";
+            postItemId.innerText = `Id: ${postId}`;
+            let postItemTime = document.createElement("div");
+            postItemTime.className = "postItemInfo";
+            postItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
+            let postItemText = document.createElement("div");
+            postItemText.className = "postItemText";
+            postItemText.innerText = postStr;
+        
+            postItemRight.append(postItemId, postItemTime, postItemText);
+            postItem.append(postItemLeft, postItemRight);
+            return postItem
+        }
+    </script>
+
     <div id="topBar">
         <div id="logo"></div>
         <div id="topName">CodeRyokai</div>
@@ -210,6 +266,17 @@
     <div id="mainSection">
         {{mainSection}}
     </div>
-</body>
 
+    <script>
+        var globalVars = {
+            loggedIn: false,
+            username: "",
+            password: "",
+        }
+        var globalElems = {
+            loginProfileButton: document.getElementById("loginProfileButton"),
+            overPanel: document.getElementById("overPanel")
+        }
+    </script>
+</body>
 </html>

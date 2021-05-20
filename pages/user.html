@@ -1,3 +1,39 @@
+<style>
+    /* ProfileSection */
+    .profileContainer {
+        display: flex;
+        margin: 10px;
+        font-size: 18px;
+    }
+
+    #followUnfollowButton {
+        display: none;
+    }
+
+    #editAboutButton {
+        display: none;
+        margin: 0px 10px;
+        color: #1BADFF;
+        cursor: pointer;
+    }
+
+    /* PostSection */
+    .postsContainer {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #postsRange {
+        color: #A0A0A0;
+        font-weight: normal;
+        white-space: nowrap;
+    }
+
+    #addPostButton {
+        display: none;
+    }
+</style>
+
 <div id="profileSection" class="sectionBG">
     <div class="sectionTop">
         <div class="cH1">Profile</div>
@@ -34,8 +70,6 @@
 
 <script>
     var Elements = {
-        loginProfileButton: document.getElementById("loginProfileButton"),
-
         profileUsername: document.getElementById("profileUsername"),
         profileJoined: document.getElementById("profileJoined"),
         profileEntries: document.getElementById("profileEntries"),
@@ -47,10 +81,7 @@
 
         postsRange: document.getElementById("postsRange"),
         addPostButton: document.getElementById("addPostButton"),
-        postsContainer: document.getElementById("postsContainer"),
-        
-        overPanel: document.getElementById("overPanel"),
-
+        postsContainer: document.getElementById("postsContainer")
     }
     var Variables = {
         loggedIn: false,
@@ -60,20 +91,11 @@
         followButtonAction: true,
         pageEntries: 0,
         fromIndex: 0,
-        toIndex: 0,
+        toIndex: 0
     }
 
     // Function
-    function request(method, val, func){
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-            func(req.responseText)
-            }
-        };
-        req.open(method, val, true);
-        req.send();
-    }
+    function postLogin(){populateProfileSection();populatePostsSection(Variables.fromIndex, Variables.toIndex);}
 
     function populateProfileSection(){
         request("GET", `/api/getUserInfo?username=${encodeURIComponent(Variables.pageUsername)}`, function(rawRes){
@@ -91,8 +113,8 @@
                 Elements.profileFollowing.innerText = `Following: ${res.following}`;
                 Elements.profileAbout.innerText = res.about;
 
-                if (Variables.loggedIn){
-                    request("POST", `/api/isFollowingUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToCheck=${encodeURIComponent(Variables.pageUsername)}`, function(isFollowingUser){
+                if (globalVars.loggedIn){
+                    request("POST", `/api/isFollowingUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToCheck=${encodeURIComponent(Variables.pageUsername)}`, function(isFollowingUser){
                         if (isFollowingUser=="false"){
                             Variables.followButtonAction=true
                             Elements.followUnfollowButton.style.display="block";
@@ -107,7 +129,7 @@
                     });
                 }
 
-                if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                if (globalVars.loggedIn && Variables.pageUsername==globalVars.username){
                     Elements.editAboutButton.style.display="inline";
                 }else{
                     Elements.editAboutButton.style.display="none";
@@ -125,7 +147,7 @@
 
                 Elements.postsRange.innerText = `(${fromIndex}-${toIndex})`;
 
-                if (Variables.loggedIn && Variables.pageUsername==Variables.username){
+                if (globalVars.loggedIn && Variables.pageUsername==globalVars.username){
                     Elements.addPostButton.style.display="block";
                 }else{
                     Elements.addPostButton.style.display="none";
@@ -133,100 +155,29 @@
             
                 Elements.postsContainer.textContent = '';
                 for (postIndex in res){
-                    let time = new Date(0);time.setUTCSeconds(res[postIndex].time);
-                    let [month, date, year] = time.toLocaleDateString("en-US").split("/");
-                    let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
-            
-                    let postItem = document.createElement("div");
-                    postItem.className = "postItem";
-                
-                    let postItemLeft = document.createElement("div");
-                    postItemLeft.className = "postItemLeft";
-                    let postItemRight = document.createElement("div");
-                    postItemRight.className = "postItemRight";
-                    
-                    let postItemId = document.createElement("div");
-                    postItemId.className = "postItemInfo";
-                    postItemId.innerText = `Id: ${res[postIndex].id}`;
-                    let postItemTime = document.createElement("div");
-                    postItemTime.className = "postItemInfo";
-                    postItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
-                    let postItemText = document.createElement("div");
-                    postItemText.className = "postItemText";
-                    postItemText.innerText = res[postIndex].postStr;
-                
-                    postItemRight.append(postItemId, postItemTime, postItemText);
-                    postItem.append(postItemLeft, postItemRight);
-                    Elements.postsContainer.append(postItem);
+                    Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr));
                 }
 
             }
         });
     }
 
-    function loginProfileButton(){
-        if (Variables.loggedIn == false){
-            Elements.overPanel.style.display="flex"
-            Elements.overPanel.innerHTML=`
-            <div class="sectionBG">
-                <div class="sectionTop">
-                    <div class="cH1">Login</div>
-                    <div class="button" onclick="javascript:closeOverPanel()">Close</div>
-                </div>
-                <hr>
-                <div class="overPanelInnerSection">
-                    Username
-                    <div class="CInput" id="overPanelUsername" contentEditable="true"></div>
-                    Password
-                    <div class="CInput" id="overPanelPassword" contentEditable="true"></div>
-                    Email (Only when Signing Up)
-                    <div class="CInput" id="overPanelEmail" contentEditable="true"></div>
-                </div>
-                <div class="button" onclick="javascript:login()">Login</div>
-                <div class="button" onclick="javascript:signup()">Signup</div>
-            </div>`
-        }else{/*profile code here*/}
-    }
-    function login(){
-        let username = document.getElementById("overPanelUsername").innerText;
-        let password = document.getElementById("overPanelPassword").innerText;
-        request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
-            if (rawRes == "success"){
-                Variables.loggedIn=true;
-                Variables.username=username;
-                Variables.password=password;
-
-                Elements.loginProfileButton.innerText = "Profile"
-                populateProfileSection();populatePostsSection(Variables.fromIndex, Variables.toIndex);closeOverPanel()
-            }
-        });
-    }
-    function signup(){
-        let username = document.getElementById("overPanelUsername").innerText;
-        let password = document.getElementById("overPanelPassword").innerText;
-        let email = document.getElementById("overPanelEmail").innerText;
-        request("POST", `/api/signup?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`, (rawRes)=>{
-            if (rawRes == "success"){login();}
-        });
-    }
-
-
     function followUnfollowButton(){
-        if (Variables.loggedIn == true){
+        if (globalVars.loggedIn == true){
             if(Variables.followButtonAction==true){
-                request("POST", `/api/followUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToFollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
+                request("POST", `/api/followUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToFollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
                 populateProfileSection()
             }else{
-                request("POST", `/api/unfollowUser?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&userToUnfollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
+                request("POST", `/api/unfollowUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToUnfollow=${encodeURIComponent(Variables.pageUsername)}`, (res)=>{});
                 populateProfileSection()
             }
         };
     }
 
     function editAboutButton(){
-        if (Variables.loggedIn && Variables.pageUsername==Variables.username){
-            Elements.overPanel.style.display="flex"
-            Elements.overPanel.innerHTML=`
+        if (globalVars.loggedIn && Variables.pageUsername==globalVars.username){
+            globalElems.overPanel.style.display="flex"
+            globalElems.overPanel.innerHTML=`
             <div class="sectionBG">
                 <div class="sectionTop">
                     <div class="cH1">Edit About</div>
@@ -242,7 +193,7 @@
     }
     function editAbout(){
         let about = document.getElementById("overPanelAbout").innerText;
-        request("POST", `/api/addAbout?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&aboutStr=${encodeURIComponent(about)}`, (rawRes)=>{
+        request("POST", `/api/addAbout?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&aboutStr=${encodeURIComponent(about)}`, (rawRes)=>{
             if (rawRes == "success"){populateProfileSection();closeOverPanel();}
         });
     }
@@ -261,9 +212,9 @@
     }
 
     function addPostButton(){
-        if (Variables.loggedIn && Variables.pageUsername==Variables.username){
-            Elements.overPanel.style.display="flex"
-            Elements.overPanel.innerHTML=`
+        if (globalVars.loggedIn && Variables.pageUsername==globalVars.username){
+            globalElems.overPanel.style.display="flex"
+            globalElems.overPanel.innerHTML=`
             <div class="sectionBG">
                 <div class="sectionTop">
                     <div class="cH1">Add Post</div>
@@ -279,13 +230,9 @@
     }
     function addPost(){
         let post = document.getElementById("overPanelPost").innerText;
-        request("POST", `/api/addPost?username=${encodeURIComponent(Variables.username)}&password=${encodeURIComponent(Variables.password)}&postStr=${encodeURIComponent(post)}`, function(rawRes){
+        request("POST", `/api/addPost?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postStr=${encodeURIComponent(post)}`, function(rawRes){
             if (rawRes == "success"){populatePostsSection(0, 9);closeOverPanel();}
         });
-    }
-
-    function closeOverPanel(){
-        Elements.overPanel.style.display="none"
     }
 
     function startLoading(){

@@ -143,6 +143,7 @@
         .postItem {
             display: flex;
             margin: 10px;
+            cursor: pointer;
         }
         .postItemLeft {
             height: auto;
@@ -155,7 +156,7 @@
             color: #A0A0A0;
         }
         .postItemText {
-            margin-top: 5px;
+            margin: 5px 0px;
             font-size: 20px;
         }
     </style>
@@ -226,7 +227,9 @@
             globalElems.overPanel.style.display="none"
         }
 
-        function createChatItem(postId, Rawtime, postStr){
+        function openPost(postId){/*UNDER CONSTRUCTION*/}
+
+        function createChatItem(postId, Rawtime, postStr, likes, comments){
             let time = new Date(0);time.setUTCSeconds(Rawtime);
             let [month, date, year] = time.toLocaleDateString("en-US").split("/");
             let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
@@ -248,9 +251,13 @@
             let postItemText = document.createElement("div");
             postItemText.className = "postItemText";
             postItemText.innerText = postStr;
+            let postItemLikesNComments = document.createElement("div");
+            postItemLikesNComments.className = "postItemInfo";
+            postItemLikesNComments.innerText = `${likes} Likes, ${comments} Comments`;
         
-            postItemRight.append(postItemId, postItemTime, postItemText);
+            postItemRight.append(postItemId, postItemTime, postItemText, postItemLikesNComments);
             postItem.append(postItemLeft, postItemRight);
+            postItem.setAttribute("onclick", `javascript:openPost("${postId}")`)
             return postItem
         }
     </script>

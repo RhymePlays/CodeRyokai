@@ -155,7 +155,7 @@
             
                 Elements.postsContainer.textContent = '';
                 for (postIndex in res){
-                    Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr));
+                    Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments));
                 }
 
             }

@@ -59,9 +59,9 @@
 <div id="postsSection" class="sectionBG">
     <div class="sectionTop">
         <div class="cH1">Posts</div>
-        <div class="button" id="postsRangeLeft" onclick="javascript:postsRangeLeftButton()"><-</div>
+        <div class="button" onclick="javascript:postsRangeLeftButton()"><-</div>
         <div id="postsRange">(0-0)</div>
-        <div class="button" id="postsRangeRight" onclick="javascript:postsRangeRightButton()">-></div>
+        <div class="button" onclick="javascript:postsRangeRightButton()">-></div>
         <div class="button" id="addPostButton" onclick="javascript:addPostButton()">Add Post</div>
     </div>
     <hr>
@@ -155,7 +155,7 @@
             
                 Elements.postsContainer.textContent = '';
                 for (postIndex in res){
-                    Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments));
+                    Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments, res[postIndex].isCommentTo));
                 }
 
             }

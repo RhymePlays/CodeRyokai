@@ -1,0 +1,175 @@
+<style>
+    .postPageInnerSectionTop {
+        display: flex;
+        align-items: center;
+        margin: 0px 10px;
+        white-space: nowrap;
+        font-weight: bold;
+    }
+    #postLikes{margin: 10px 0px;}
+    #postComments{margin: 10px 0px;}
+    .sep {width: 100%;}
+    #commentsRange {
+        color: #A0A0A0;
+        font-weight: normal;
+        white-space: nowrap;
+    }
+    #likeButton{display: none;}
+    #commentButton{display: none;}
+</style>
+
+<div class="sectionBG">
+    <div class="sectionTop">
+        <div class="postPageInnerSectionTop">
+            <div id="postLikes">0 Likes</div>
+            <div id="likeButton" class="button" onclick="javascript:likeUnlikeButton()">Like</div>
+        </div>
+        <div class="sep"></div>
+        <div class="postPageInnerSectionTop">
+            <div id="postComments">0 Comments</div>
+            <div id="commentButton" class="button" onclick="javascript:commentButton()">Comment</div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="postMessageContainer"></div>
+
+    <hr>
+
+    <div class="sectionTop">
+        <div class="cH1">Comment</div>
+        <div class="button" onclick="javascript:commentsRangeLeftButton()"><-</div>
+        <div id="commentsRange">(0-0)</div>
+        <div class="button" onclick="javascript:commentsRangeRightButton()">-></div>
+    </div>
+
+    <div id="postCommentContainer"></div>
+    
+    <script>
+        var Variables = {
+            postId: "",
+            fromIndex: 0,
+            toIndex: 0,
+            likeButtonAction: true,
+            totalComments: 0
+        }
+        var Elements = {
+            postLikes: document.getElementById("postLikes"),
+            postComments: document.getElementById("postComments"),
+            postMessageContainer: document.getElementById("postMessageContainer"),
+            commentsRange: document.getElementById("commentsRange"),
+            commentContainer: document.getElementById("postCommentContainer"),
+            likeButton: document.getElementById("likeButton"),
+            commentButton: document.getElementById("commentButton"),
+        }
+        
+        function postLogin(){populatePost()}
+
+        function populatePost(){
+            request("GET", `/api/getPostById?postId=${encodeURIComponent(Variables.postId)}`, function(rawRes){
+                if (rawRes != "error"){
+                    let res = JSON.parse(rawRes);
+
+                    Variables.totalComments = res.comments;
+                    
+                    if (globalVars.loggedIn){
+                        Elements.commentButton.style.display="block";
+                        request("POST", `/api/isLiked?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postId=${encodeURIComponent(Variables.postId)}`, function(isLiked){
+                            if (isLiked=="false"){
+                                Variables.likeButtonAction=true
+                                Elements.likeButton.style.display="block";
+                                Elements.likeButton.style.backgroundColor="#1BADFF";
+                                Elements.likeButton.innerText="Like";
+                            }else if(isLiked=="true"){
+                                Variables.likeButtonAction=false
+                                Elements.likeButton.style.display="block";
+                                Elements.likeButton.style.backgroundColor="#FB1E46";
+                                Elements.likeButton.innerText="Unlike";
+                            }
+                        });
+                    }
+
+                    Elements.postLikes.innerText = res.likes+" Likes"
+                    Elements.postComments.innerText = res.comments+" Comments"
+
+                    Elements.postMessageContainer.textContent = "";
+                    Elements.postMessageContainer.append(createChatItem(res.id, res.time, res.postStr, res.likes, res.comments, res.isCommentTo));
+                }
+            });
+        }
+        
+        function populateComments(fromIndex, toIndex){
+            request("GET", `/api/getPostComments?postId=${encodeURIComponent(Variables.postId)}&fromIndex=${encodeURIComponent(fromIndex)}&toIndex=${encodeURIComponent(toIndex)}`, function(rawRes){
+                if (rawRes != "error"){
+                    let res = JSON.parse(rawRes);
+                    Variables.fromIndex=fromIndex;Variables.toIndex=toIndex;
+
+                    Elements.commentsRange.innerText = `(${fromIndex}-${toIndex})`;
+                
+                    Elements.commentContainer.textContent = "";
+                    for (postIndex in res){
+                        Elements.commentContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments, res[postIndex].isCommentTo));
+                    }
+
+                }
+            });
+        }
+
+        function likeUnlikeButton(){
+            if (globalVars.loggedIn == true){
+                if(Variables.likeButtonAction==true){
+                    request("POST", `/api/likePost?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postId=${encodeURIComponent(Variables.postId)}`, (res)=>{});
+                    populatePost()
+                }else{
+                    request("POST", `/api/unlikePost?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postId=${encodeURIComponent(Variables.postId)}`, (res)=>{});
+                    populatePost()
+                }
+            }
+        }
+
+        function commentButton(){
+            if (globalVars.loggedIn){
+                globalElems.overPanel.style.display="flex"
+                globalElems.overPanel.innerHTML=`
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Comment</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        <div class="CInput" id="overPanelComment" contentEditable="true"></div>
+                    </div>
+                    <div class="button" onclick="javascript:comment()">Comment</div>
+                </div>`
+            }
+        }
+        function comment(){
+            let commentStr = document.getElementById("overPanelComment").innerText;
+            request("POST", `/api/comment?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postId=${encodeURIComponent(Variables.postId)}&commentStr=${encodeURIComponent(commentStr)}`, (res)=>{
+                if (res=="success"){populateComments(0, 9);closeOverPanel();}
+            });
+        }
+
+        function commentsRangeLeftButton(){
+            let diff = 10;
+            if (Variables.fromIndex-diff >= 0){
+                populateComments((Variables.fromIndex-diff), (Variables.toIndex-diff));
+            }
+        }
+        function commentsRangeRightButton(){
+            let diff = 10;
+            if (Variables.fromIndex < Variables.totalComments-1){
+                console.log("R")
+                populateComments((Variables.fromIndex+diff), (Variables.toIndex+diff));
+            }
+        }
+
+        function startLoading(){
+            var urlPath = window.location.pathname.split("/");
+            Variables.postId = `${urlPath[2]}#${urlPath[3]}`
+            populatePost();populateComments(0, 9);
+        }startLoading();
+    </script>
+</div>

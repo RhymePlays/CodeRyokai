@@ -157,18 +157,15 @@ def getUserPosts():
             fromIndex = request.args["fromIndex"]
             toIndex = request.args["toIndex"]
 
-            if username in accounts:
-                try:
-                    fromIndex=int(fromIndex);toIndex=int(toIndex)
-                    returnValue=[]
-                    for index in range(fromIndex, toIndex):
-                        try:
-                            returnValue.append({"postStr": accounts[username]["posts"][index]["postStr"], "time": accounts[username]["posts"][index]["time"], "id": accounts[username]["posts"][index]["id"], "likes": len(accounts[username]["posts"][index]["likes"]), "comments": len(accounts[username]["posts"][index]["comments"])})
-                        except:
-                            return json.dumps(returnValue)
-                    return json.dumps(returnValue)
-                except:
-                    return "error"
+            if (username in accounts) and strToIntCheck(fromIndex) and strToIntCheck(toIndex):
+                fromIndex=int(fromIndex);toIndex=int(toIndex)
+                returnValue=[]
+                for index in range(fromIndex, toIndex):
+                    try:
+                        returnValue.append({"postStr": accounts[username]["posts"][index]["postStr"], "time": accounts[username]["posts"][index]["time"], "id": accounts[username]["posts"][index]["id"], "likes": len(accounts[username]["posts"][index]["likes"]), "comments": len(accounts[username]["posts"][index]["comments"]), "isCommentTo": accounts[username]["posts"][index]["isCommentTo"]})
+                    except:
+                        return json.dumps(returnValue)
+                return json.dumps(returnValue)
             else:
                 return "error"
         else:
@@ -264,12 +261,12 @@ def getPostById():
         if "postId" in request.args:
             postId = request.args["postId"]
 
-            splitedPostId = postId.split("#")
-            if len(splitedPostId) == 2:
-                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
-                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+            splittedPostId = postId.split("#")
+            if len(splittedPostId) == 2:
+                if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]):
+                    postIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
                     if postIndex >= 0:
-                        return {"postStr": accounts[splitedPostId[0]]["posts"][postIndex]["postStr"], "time": accounts[splitedPostId[0]]["posts"][postIndex]["time"], "id": accounts[splitedPostId[0]]["posts"][postIndex]["id"], "likes": len(accounts[splitedPostId[0]]["posts"][postIndex]["likes"]), "comments": len(accounts[splitedPostId[0]]["posts"][postIndex]["comments"])}
+                        return {"postStr": accounts[splittedPostId[0]]["posts"][postIndex]["postStr"], "time": accounts[splittedPostId[0]]["posts"][postIndex]["time"], "id": accounts[splittedPostId[0]]["posts"][postIndex]["id"], "likes": len(accounts[splittedPostId[0]]["posts"][postIndex]["likes"]), "comments": len(accounts[splittedPostId[0]]["posts"][postIndex]["comments"]), "isCommentTo": accounts[splittedPostId[0]]["posts"][postIndex]["isCommentTo"]}
                     else:
                         return "error"
                 else:
@@ -289,12 +286,12 @@ def likePost():
             password = request.args["password"]
             postId = request.args["postId"]
 
-            splitedPostId = postId.split("#")
-            if authCheck(username, password) and len(splitedPostId) == 2:
-                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]) and (postId not in accounts[username]["likes"]):
-                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+            splittedPostId = postId.split("#")
+            if authCheck(username, password) and len(splittedPostId) == 2:
+                if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]) and (postId not in accounts[username]["likes"]):
+                    postIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
                     if postIndex >= 0:
-                        accounts[splitedPostId[0]]["posts"][postIndex]["likes"].append(username)
+                        accounts[splittedPostId[0]]["posts"][postIndex]["likes"].append(username)
                         accounts[username]["likes"].append(postId)
                         return "success"
                     else:
@@ -316,18 +313,38 @@ def unlikePost():
             password = request.args["password"]
             postId = request.args["postId"]
 
-            splitedPostId = postId.split("#")
-            if authCheck(username, password) and len(splitedPostId) == 2:
-                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]) and (postId in accounts[username]["likes"]):
-                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+            splittedPostId = postId.split("#")
+            if authCheck(username, password) and len(splittedPostId) == 2:
+                if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]) and (postId in accounts[username]["likes"]):
+                    postIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
                     if postIndex >= 0:
-                        accounts[splitedPostId[0]]["posts"][postIndex]["likes"].remove(username)
+                        accounts[splittedPostId[0]]["posts"][postIndex]["likes"].remove(username)
                         accounts[username]["likes"].remove(postId)
                         return "success"
                     else:
                         return "error"
                 else:
                     return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/isLiked", methods=["POST"])
+def isLiked():
+    if request.method == "POST":
+        if ("username" in request.args) and ("password" in request.args) and ("postId" in request.args):
+            username = request.args["username"]
+            password = request.args["password"]
+            postId = request.args["postId"]
+
+            if authCheck(username, password):
+                if postId in accounts[username]["likes"]:
+                    return "true"
+                else:
+                    return "false"
             else:
                 return "error"
         else:
@@ -344,18 +361,67 @@ def comment():
             postId = request.args["postId"]
             commentStr = request.args["commentStr"]
 
-            splitedPostId = postId.split("#")
-            if authCheck(username, password) and len(splitedPostId) == 2 and (len(commentStr) >= 1):
-                if (splitedPostId[0] in accounts) and strToIntCheck(splitedPostId[1]):
-                    postIndex = (len(accounts[splitedPostId[0]]["posts"]) - int(splitedPostId[1])) - 1
+            splittedPostId = postId.split("#")
+            if authCheck(username, password) and len(splittedPostId) == 2 and (len(commentStr) >= 1):
+                if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]):
+                    postIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
                     if postIndex >= 0:
                         commentId = f'{username}#{len(accounts[username]["posts"])}'
 
                         accounts[username]["posts"].insert(0, {"postStr": commentStr, "time": time.time(), "id": commentId, "likes": [], "comments": [], "isCommentTo": postId})
 
-                        accounts[splitedPostId[0]]["posts"][postIndex+1]["comments"].append(commentId)
+                        accounts[splittedPostId[0]]["posts"][postIndex+1]["comments"].insert(0, commentId)
                         accounts[username]["comments"].append({"commentOn": postId, "comment": commentId})
                         return "success"
+                    else:
+                        return "error"
+                else:
+                    return "error"
+            else:
+                return "error"
+        else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/getPostComments", methods=["GET"])
+def getPostComments():
+    if request.method == "GET":
+        if ("postId" in request.args) and ("fromIndex" in request.args) and ("toIndex" in request.args):
+            postId = request.args["postId"]
+            fromIndex = request.args["fromIndex"]
+            toIndex = request.args["toIndex"]
+
+            splittedPostId = postId.split("#")
+            if len(splittedPostId) == 2:
+                if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]) and strToIntCheck(fromIndex) and strToIntCheck(toIndex):
+                    postIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
+                    if postIndex >= 0:
+
+                        allComments = accounts[splittedPostId[0]]["posts"][postIndex]["comments"]
+
+                        fromIndex=int(fromIndex);toIndex=int(toIndex)
+                        returnValue=[]
+                        for index in range(fromIndex, toIndex):
+                            try:
+
+                                splittedCommentId = allComments[index].split("#")
+                                if len(splittedCommentId) == 2:
+                                    if (splittedCommentId[0] in accounts) and strToIntCheck(splittedCommentId[1]):
+                                        commentIndex = (len(accounts[splittedCommentId[0]]["posts"]) - int(splittedCommentId[1])) - 1
+                                        if commentIndex >= 0:
+                                            returnValue.append({"postStr": accounts[splittedCommentId[0]]["posts"][commentIndex]["postStr"], "time": accounts[splittedCommentId[0]]["posts"][commentIndex]["time"], "id": accounts[splittedCommentId[0]]["posts"][commentIndex]["id"], "likes": len(accounts[splittedCommentId[0]]["posts"][commentIndex]["likes"]), "comments": len(accounts[splittedCommentId[0]]["posts"][commentIndex]["comments"]), "isCommentTo": accounts[splittedCommentId[0]]["posts"][commentIndex]["isCommentTo"]})
+                                        else:
+                                            return "error"
+                                    else:
+                                        return "error"
+                                else:
+                                    return "error"
+
+                            except:
+                                return json.dumps(returnValue)
+                        return json.dumps(returnValue)
+                        
                     else:
                         return "error"
                 else:
@@ -383,8 +449,19 @@ def userPage(username):
     else:
         return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
 
+@app.route("/user/<username>/<postIndexRaw>", methods=["GET", "POST"])
+def postPage(username, postIndexRaw):
+    if (username in accounts) and strToIntCheck(postIndexRaw):
+        postIndex = (len(accounts[username]["posts"]) - int(postIndexRaw)) - 1
+        if postIndex >= 0:
+            return render_template_string(webUI["basePage"], mainSection = Markup(webUI["postPage"]))
+        else: 
+            return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+    else:
+        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+
 # Starting Point
 if __name__ == "__main__":
-    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
+    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/post.html", "pageTag": "postPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
     savingThread = threading.Thread(target=autoSaveDatabase);savingThread.start()
     app.run(port=80, debug=True)

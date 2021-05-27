@@ -85,6 +85,7 @@
             color: white;
             height: 30px;
             font-size: 25px;
+            border: none;
             border-radius: 5px;
             padding: 5px;
             margin: 10px 0px;
@@ -113,6 +114,12 @@
             margin-left: 10px;
         }
 
+        #signOutProfileButton{
+            display: none;
+            background-color: #FB1E46;
+            margin-right: 0px;
+        }
+
         /* MainSection */
         #mainSection {
             margin: 10px 0px;
@@ -137,6 +144,8 @@
 
         .overPanelInnerSection {
             margin: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         /* PostItem */
@@ -187,11 +196,11 @@
                     <hr>
                     <div class="overPanelInnerSection">
                         Username
-                        <div class="CInput" id="overPanelUsername" contentEditable="true"></div>
+                        <input type="text" class="CInput" id="overPanelUsername">
                         Password
-                        <div class="CInput" id="overPanelPassword" contentEditable="true"></div>
+                        <input type="password" class="CInput" id="overPanelPassword">
                         Email (Only when Signing Up)
-                        <div class="CInput" id="overPanelEmail" contentEditable="true"></div>
+                        <input type="text" class="CInput" id="overPanelEmail">
                     </div>
                     <div class="button" onclick="javascript:login()">Login</div>
                     <div class="button" onclick="javascript:signup()">Signup</div>
@@ -199,27 +208,38 @@
             }else{window.location.href = "/user/"+globalVars.username}
         }
         function login(){
-            let username = document.getElementById("overPanelUsername").innerText;
-            let password = document.getElementById("overPanelPassword").innerText;
+            let username = document.getElementById("overPanelUsername").value;
+            let password = document.getElementById("overPanelPassword").value;
             request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
                 if (rawRes == "success"){
                     globalVars.loggedIn=true;
                     globalVars.username=username;
                     globalVars.password=password;
+
+                    localStorage.setItem("username", username)
+                    localStorage.setItem("password", password)
                     
                     globalElems.loginProfileButton.innerText = "Profile";
+                    globalElems.signOutProfileButton.style.display = "block";
+
                     try{postLogin();}catch(e){console.log("DEBUG: Warning post-login action not set on this page", "color: yellow;")}
                     closeOverPanel()
                 }
             });
         }
         function signup(){
-            let username = document.getElementById("overPanelUsername").innerText;
-            let password = document.getElementById("overPanelPassword").innerText;
-            let email = document.getElementById("overPanelEmail").innerText;
+            let username = document.getElementById("overPanelUsername").value;
+            let password = document.getElementById("overPanelPassword").value;
+            let email = document.getElementById("overPanelEmail").value;
             request("POST", `/api/signup?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`, (rawRes)=>{
                 if (rawRes == "success"){login();}
             });
+        }
+
+        function signOutProfileButton(){
+            localStorage.removeItem("username");
+            localStorage.removeItem("password");
+            window.location.href = window.location.href;
         }
 
         function closeOverPanel(){
@@ -280,6 +300,7 @@
     <div id="topBar">
         <div id="logo"></div>
         <div id="topName">CodeRyokai</div>
+        <div class="button" id="signOutProfileButton" onclick="javascript:signOutProfileButton()">Sign Out</div>
         <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
     </div>
 
@@ -297,8 +318,28 @@
         }
         var globalElems = {
             loginProfileButton: document.getElementById("loginProfileButton"),
-            overPanel: document.getElementById("overPanel")
+            overPanel: document.getElementById("overPanel"),
+            signOutProfileButton: document.getElementById("signOutProfileButton")
         }
+
+        function retrieveData(){
+            let username = localStorage.getItem("username")
+            let password = localStorage.getItem("password")
+            if (username != null && password != null){
+                request("POST", `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (rawRes)=>{
+                    if (rawRes == "success"){
+                        globalVars.loggedIn=true;
+                        globalVars.username=username;
+                        globalVars.password=password;
+                        
+                        globalElems.loginProfileButton.innerText = "Profile";
+                        globalElems.signOutProfileButton.style.display = "block";
+                        try{postLogin();}catch(e){console.log("DEBUG: Warning post-login action not set on this page", "color: yellow;")}
+                    }
+                });
+            }
+        }
+        window.addEventListener("load", retrieveData);
     </script>
 </body>
 </html>

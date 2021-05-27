@@ -95,7 +95,7 @@
     }
 
     // Function
-    function postLogin(){populateProfileSection();populatePostsSection(Variables.fromIndex, Variables.toIndex);}
+    function postLogin(){populateProfileSection();populatePostsSection(0, 9);}
 
     function populateProfileSection(){
         request("GET", `/api/getUserInfo?username=${encodeURIComponent(Variables.pageUsername)}`, function(rawRes){
@@ -185,14 +185,14 @@
                 </div>
                 <hr>
                 <div class="overPanelInnerSection">
-                    <div class="CInput" id="overPanelAbout" contentEditable="true"></div>
+                    <input type="text" class="CInput" id="overPanelAbout">
                 </div>
                 <div class="button" onclick="javascript:editAbout()">Save</div>
             </div>`
         };
     }
     function editAbout(){
-        let about = document.getElementById("overPanelAbout").innerText;
+        let about = document.getElementById("overPanelAbout").value;
         request("POST", `/api/addAbout?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&aboutStr=${encodeURIComponent(about)}`, (rawRes)=>{
             if (rawRes == "success"){populateProfileSection();closeOverPanel();}
         });
@@ -222,14 +222,14 @@
                 </div>
                 <hr>
                 <div class="overPanelInnerSection">
-                    <div class="CInput" id="overPanelPost" contentEditable="true"></div>
+                    <input type="text" class="CInput" id="overPanelPost">
                 </div>
                 <div class="button" onclick="javascript:addPost()">Save</div>
             </div>`
         }
     }
     function addPost(){
-        let post = document.getElementById("overPanelPost").innerText;
+        let post = document.getElementById("overPanelPost").value;
         request("POST", `/api/addPost?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postStr=${encodeURIComponent(post)}`, function(rawRes){
             if (rawRes == "success"){populatePostsSection(0, 9);closeOverPanel();}
         });

@@ -139,14 +139,14 @@
                     </div>
                     <hr>
                     <div class="overPanelInnerSection">
-                        <div class="CInput" id="overPanelComment" contentEditable="true"></div>
+                        <input type="text" class="CInput" id="overPanelComment">
                     </div>
                     <div class="button" onclick="javascript:comment()">Comment</div>
                 </div>`
             }
         }
         function comment(){
-            let commentStr = document.getElementById("overPanelComment").innerText;
+            let commentStr = document.getElementById("overPanelComment").value;
             request("POST", `/api/comment?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postId=${encodeURIComponent(Variables.postId)}&commentStr=${encodeURIComponent(commentStr)}`, (res)=>{
                 if (res=="success"){populateComments(0, 9);closeOverPanel();}
             });

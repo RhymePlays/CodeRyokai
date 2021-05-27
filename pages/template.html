@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeRyokai</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&amp;family=Roboto&amp;display=swap"
+        rel="stylesheet">
 
     <style>
         /*
@@ -31,8 +31,6 @@
             color: white;
             height: 100%;
         }
-
-        /* G */
 
         /* Global */
         .button {
@@ -116,6 +114,12 @@
             margin-left: 10px;
         }
 
+        #signOutProfileButton {
+            display: none;
+            background-color: #FB1E46;
+            margin-right: 0px;
+        }
+
         /* MainSection */
         #mainSection {
             margin: 10px 0px;
@@ -144,40 +148,7 @@
             flex-direction: column;
         }
 
-        /* ProfileSection */
-        .profileContainer {
-            display: flex;
-            margin: 10px;
-            font-size: 18px;
-        }
-
-        #followUnfollowButton {
-            display: none;
-        }
-
-        #editAboutButton {
-            display: none;
-            margin: 0px 10px;
-            color: #1BADFF;
-            cursor: pointer;
-        }
-
-        /* PostSection */
-        .postsContainer {
-            display: flex;
-            flex-direction: row;
-        }
-
-        #postsRange {
-            color: #A0A0A0;
-            font-weight: normal;
-            white-space: nowrap;
-        }
-
-        #addPostButton {
-            display: none;
-        }
-
+        /* PostItem */
         .postItem {
             display: flex;
             margin: 10px;
@@ -196,42 +167,532 @@
         }
 
         .postItemText {
-            margin-top: 5px;
+            margin: 5px 0px;
             font-size: 20px;
         }
     </style>
 
 </head>
 
-<body>
+<body data-new-gr-c-s-check-loaded="14.1012.0" data-gr-ext-installed="">
+    <script>
+        function request(method, val, func) {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    func(req.responseText)
+                }
+            };
+            req.open(method, val, true);
+            req.send();
+        }
+
+        function loginProfileButton() {
+            if (globalVars.loggedIn == false) {
+                globalElems.overPanel.style.display = "flex"
+                globalElems.overPanel.innerHTML = `
+                <div class="sectionBG">
+                    <div class="sectionTop">
+                        <div class="cH1">Login</div>
+                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    </div>
+                    <hr>
+                    <div class="overPanelInnerSection">
+                        Username
+                        <input type="text" class="CInput" id="overPanelUsername">
+                        Password
+                        <input type="password" class="CInput" id="overPanelPassword">
+                        Email (Only when Signing Up)
+                        <input type="text" class="CInput" id="overPanelEmail">
+                    </div>
+                    <div class="button" onclick="javascript:login()">Login</div>
+                    <div class="button" onclick="javascript:signup()">Signup</div>
+                </div>`
+            } else {
+                window.location.href = "/user/" + globalVars.username
+            }
+        }
+
+        function login() {
+            let username = document.getElementById("overPanelUsername").value;
+            let password = document.getElementById("overPanelPassword").value;
+            request("POST",
+                `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, (
+                    rawRes) => {
+                    if (rawRes == "success") {
+                        globalVars.loggedIn = true;
+                        globalVars.username = username;
+                        globalVars.password = password;
+
+                        localStorage.setItem("username", username)
+                        localStorage.setItem("password", password)
+
+                        globalElems.loginProfileButton.innerText = "Profile";
+                        globalElems.signOutProfileButton.style.display = "block";
+
+                        try {
+                            postLogin();
+                        } catch (e) {
+                            console.log("DEBUG: Warning post-login action not set on this page", "color: yellow;")
+                        }
+                        closeOverPanel()
+                    }
+                });
+        }
+
+        function signup() {
+            let username = document.getElementById("overPanelUsername").value;
+            let password = document.getElementById("overPanelPassword").value;
+            let email = document.getElementById("overPanelEmail").value;
+            request("POST",
+                `/api/signup?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&email=${encodeURIComponent(email)}`,
+                (rawRes) => {
+                    if (rawRes == "success") {
+                        login();
+                    }
+                });
+        }
+
+        function signOutProfileButton() {
+            localStorage.removeItem("username");
+            localStorage.removeItem("password");
+            window.location.href = window.location.href;
+        }
+
+        function closeOverPanel() {
+            globalElems.overPanel.style.display = "none"
+        }
+
+        function openPost(postId) {
+            splittedPostId = postId.split("#")
+            if (splittedPostId.length == 2 && parseInt(splittedPostId[1]) != NaN) {
+                window.location.href = `/user/${splittedPostId[0]}/${splittedPostId[1]}`
+            }
+        }
+
+        function createChatItem(postId, Rawtime, postStr, likes, comments, isCommentTo) {
+            let time = new Date(0);
+            time.setUTCSeconds(Rawtime);
+            let [month, date, year] = time.toLocaleDateString("en-US").split("/");
+            let [hour, minute] = time.toLocaleTimeString("en-US").split(/:| /);
+
+            let postItem = document.createElement("div");
+            postItem.className = "postItem";
+
+            let postItemLeft = document.createElement("div");
+            postItemLeft.className = "postItemLeft";
+            let postItemRight = document.createElement("div");
+            postItemRight.className = "postItemRight";
+
+            let postItemId = document.createElement("div");
+            postItemId.className = "postItemInfo";
+            postItemId.innerText = `Id: ${postId}`;
+            postItemId.style.cursor = "pointer"
+            postItemId.setAttribute("onclick", `javascript:openPost("${postId}")`)
+            let postItemTime = document.createElement("div");
+            postItemTime.className = "postItemInfo";
+            postItemTime.innerText = `Time: ${month}/${date}/${year} at ${hour}:${minute}`;
+            let postItemText = document.createElement("div");
+            postItemText.className = "postItemText";
+            postItemText.innerText = postStr;
+            let postItemLikesNComments = document.createElement("div");
+            postItemLikesNComments.className = "postItemInfo";
+            postItemLikesNComments.innerText = `${likes} Likes, ${comments} Comments`;
+
+            if (isCommentTo != null) {
+                let commentTo = document.createElement("div");
+                commentTo.className = "postItemInfo";
+                commentTo.innerText = `Commented on: ${isCommentTo}`;
+                commentTo.style.cursor = "pointer"
+                commentTo.setAttribute("onclick", `javascript:openPost("${isCommentTo}")`)
+                postItemRight.append(commentTo, postItemId, postItemTime, postItemText, postItemLikesNComments);
+            } else {
+                postItemRight.append(postItemId, postItemTime, postItemText, postItemLikesNComments);
+            }
+            postItem.append(postItemLeft, postItemRight);
+            return postItem
+        }
+    </script>
+
     <div id="topBar">
         <div id="logo"></div>
         <div id="topName">CodeRyokai</div>
-        <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
+        <div class="button" id="signOutProfileButton" onclick="javascript:signOutProfileButton()"
+            style="display: block;">Sign Out</div>
+        <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Profile</div>
     </div>
 
     <div id="overPanel"></div>
 
-    <div id="mainSection"> <!-- Only code inside this block -->
-
+    <div id="mainSection">
         <style>
-            /*Add any additional CSS here*/
+            /* ProfileSection */
+            .profileContainer {
+                display: flex;
+                margin: 10px;
+                font-size: 18px;
+            }
+
+            #followUnfollowButton {
+                display: none;
+            }
+
+            #editAboutButton {
+                display: none;
+                margin: 0px 10px;
+                color: #1BADFF;
+                cursor: pointer;
+            }
+
+            /* PostSection */
+            .postsContainer {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #postsRange {
+                color: #A0A0A0;
+                font-weight: normal;
+                white-space: nowrap;
+            }
+
+            #addPostButton {
+                display: none;
+            }
         </style>
 
-        <div class="sectionBG"> <!-- This is what makes the sections -->
+        <style>
+            /* add new css here */
+        </style>
 
-            <div class="sectionTop"> <!-- This makes the "Top bit" / "Title bit" of a section. usually includes cH1-->
-                <div class="cH1">Theme</div> <!-- This is usually found inside sectionTop. Used to name a section, shoves everything after it to the right -->
+        <div id="profileSection" class="sectionBG">
+            <div class="sectionTop">
+                <div class="cH1">Profile</div>
+                <div class="button" id="followUnfollowButton" onclick="javascript:followUnfollowButton()"
+                    style="display: block; background-color: rgb(251, 30, 70);">Unfollow</div>
             </div>
-
-            <hr> <!-- This one's the custom HR, not much to say -->
-
-            <div class="button">Button</div> <!-- this creates the button -->
-        
+            <hr>
+            <div class="profileContainer">
+                <div id="profileStatsSection">
+                    <div id="profileUsername">Name: Rhyme</div>
+                    <div id="profileJoined">Joined: 5/20/2021</div>
+                    <div id="profileEntries">Entries: 4</div>
+                    <div id="profileFollower">Followers: 3</div>
+                    <div id="profileFollowing">Following: 1</div>
+                </div>
+                <div class="cVR"></div>
+                <div class="profileAboutSection">
+                    <b>About</b><span id="editAboutButton" onclick="javascript:editAboutButton()"
+                        style="display: inline;">Edit</span>
+                    <div id="profileAbout">Watashi no Brainu wa Shit desu</div>
+                </div>
+            </div>
         </div>
 
+        <div id="postsSection" class="sectionBG">
+            <div class="sectionTop">
+                <div class="cH1">Posts</div>
+                <div class="button" onclick="javascript:postsRangeLeftButton()">&lt;-</div>
+                <div id="postsRange">(0-9)</div>
+                <div class="button" onclick="javascript:postsRangeRightButton()">-&gt;</div>
+                <div class="button" id="addPostButton" onclick="javascript:addPostButton()" style="display: block;">Add
+                    Post</div>
+            </div>
+            <hr>
+            <div id="postsContainer">
+                <div class="postItem">
+                    <div class="postItemLeft"></div>
+                    <div class="postItemRight">
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Commented on: Rhyme#2</div>
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Id: Rhyme#3</div>
+                        <div class="postItemInfo">Time: 5/27/2021 at 2:14</div>
+                        <div class="postItemText">soo.... it works?</div>
+                        <div class="postItemInfo">0 Likes, 0 Comments</div>
+                    </div>
+                </div>
+                <div class="postItem">
+                    <div class="postItemLeft"></div>
+                    <div class="postItemRight">
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Commented on: Rhyme#0</div>
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Id: Rhyme#2</div>
+                        <div class="postItemInfo">Time: 5/21/2021 at 4:25</div>
+                        <div class="postItemText">First Comment from the "U" madaflippin "I"</div>
+                        <div class="postItemInfo">0 Likes, 1 Comments</div>
+                    </div>
+                </div>
+                <div class="postItem">
+                    <div class="postItemLeft"></div>
+                    <div class="postItemRight">
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Commented on: Rhyme#0</div>
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Id: Rhyme#1</div>
+                        <div class="postItemInfo">Time: 5/20/2021 at 1:51</div>
+                        <div class="postItemText">Just a basic ol comment</div>
+                        <div class="postItemInfo">0 Likes, 0 Comments</div>
+                    </div>
+                </div>
+                <div class="postItem">
+                    <div class="postItemLeft"></div>
+                    <div class="postItemRight">
+                        <div class="postItemInfo" onclick="javascript:openPost()"
+                            style="cursor: pointer;">Id: Rhyme#0</div>
+                        <div class="postItemInfo">Time: 5/20/2021 at 1:45</div>
+                        <div class="postItemText">I'M FUKIN DED INSIDE</div>
+                        <div class="postItemInfo">1 Likes, 2 Comments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var Elements = {
+                profileUsername: document.getElementById("profileUsername"),
+                profileJoined: document.getElementById("profileJoined"),
+                profileEntries: document.getElementById("profileEntries"),
+                profileFollower: document.getElementById("profileFollower"),
+                profileFollowing: document.getElementById("profileFollowing"),
+                editAboutButton: document.getElementById("editAboutButton"),
+                profileAbout: document.getElementById("profileAbout"),
+                followUnfollowButton: document.getElementById("followUnfollowButton"),
+
+                postsRange: document.getElementById("postsRange"),
+                addPostButton: document.getElementById("addPostButton"),
+                postsContainer: document.getElementById("postsContainer")
+            }
+            var Variables = {
+                loggedIn: false,
+                username: "",
+                password: "",
+                pageUsername: "",
+                followButtonAction: true,
+                pageEntries: 0,
+                fromIndex: 0,
+                toIndex: 0
+            }
+
+            // Function
+            function postLogin() {
+                populateProfileSection();
+                populatePostsSection(0, 9);
+            }
+
+            function populateProfileSection() {
+                request("GET", `/api/getUserInfo?username=${encodeURIComponent(Variables.pageUsername)}`, function (
+                    rawRes) {
+                    if (rawRes != "error") {
+                        let res = JSON.parse(rawRes);
+                        Variables.pageEntries = res.entries;
+
+                        let time = new Date(0);
+                        time.setUTCSeconds(res.joined);
+                        let [month, date, year] = time.toLocaleDateString("en-US").split("/");
+
+                        Elements.profileUsername.innerText = `Name: ${res.username}`;
+                        Elements.profileJoined.innerText = `Joined: ${month}/${date}/${year}`;
+                        Elements.profileEntries.innerText = `Entries: ${res.entries}`;
+                        Elements.profileFollower.innerText = `Followers: ${res.followers}`;
+                        Elements.profileFollowing.innerText = `Following: ${res.following}`;
+                        Elements.profileAbout.innerText = res.about;
+
+                        if (globalVars.loggedIn) {
+                            request("POST",
+                                `/api/isFollowingUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToCheck=${encodeURIComponent(Variables.pageUsername)}`,
+                                function (isFollowingUser) {
+                                    if (isFollowingUser == "false") {
+                                        Variables.followButtonAction = true
+                                        Elements.followUnfollowButton.style.display = "block";
+                                        Elements.followUnfollowButton.style.backgroundColor = "#1BADFF";
+                                        Elements.followUnfollowButton.innerText = "Follow";
+                                    } else if (isFollowingUser == "true") {
+                                        Variables.followButtonAction = false
+                                        Elements.followUnfollowButton.style.display = "block";
+                                        Elements.followUnfollowButton.style.backgroundColor = "#FB1E46";
+                                        Elements.followUnfollowButton.innerText = "Unfollow";
+                                    }
+                                });
+                        }
+
+                        if (globalVars.loggedIn && Variables.pageUsername == globalVars.username) {
+                            Elements.editAboutButton.style.display = "inline";
+                        } else {
+                            Elements.editAboutButton.style.display = "none";
+                        }
+
+                    }
+                });
+            }
+
+            function populatePostsSection(fromIndex, toIndex) {
+                request("GET",
+                    `/api/getUserPosts?username=${encodeURIComponent(Variables.pageUsername)}&fromIndex=${encodeURIComponent(fromIndex)}&toIndex=${encodeURIComponent(toIndex)}`,
+                    function (rawRes) {
+                        if (rawRes != "error") {
+                            let res = JSON.parse(rawRes);
+                            Variables.fromIndex = fromIndex;
+                            Variables.toIndex = toIndex;
+
+                            Elements.postsRange.innerText = `(${fromIndex}-${toIndex})`;
+
+                            if (globalVars.loggedIn && Variables.pageUsername == globalVars.username) {
+                                Elements.addPostButton.style.display = "block";
+                            } else {
+                                Elements.addPostButton.style.display = "none";
+                            }
+
+                            Elements.postsContainer.textContent = '';
+                            for (postIndex in res) {
+                                Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex]
+                                    .time, res[postIndex].postStr, res[postIndex].likes, res[postIndex]
+                                    .comments, res[postIndex].isCommentTo));
+                            }
+
+                        }
+                    });
+            }
+
+            function followUnfollowButton() {
+                if (globalVars.loggedIn == true) {
+                    if (Variables.followButtonAction == true) {
+                        request("POST",
+                            `/api/followUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToFollow=${encodeURIComponent(Variables.pageUsername)}`,
+                            (res) => {});
+                        populateProfileSection()
+                    } else {
+                        request("POST",
+                            `/api/unfollowUser?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&userToUnfollow=${encodeURIComponent(Variables.pageUsername)}`,
+                            (res) => {});
+                        populateProfileSection()
+                    }
+                };
+            }
+
+            function editAboutButton() {
+                if (globalVars.loggedIn && Variables.pageUsername == globalVars.username) {
+                    globalElems.overPanel.style.display = "flex"
+                    globalElems.overPanel.innerHTML = `
+            <div class="sectionBG">
+                <div class="sectionTop">
+                    <div class="cH1">Edit About</div>
+                    <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                </div>
+                <hr>
+                <div class="overPanelInnerSection">
+                    <input type="text" class="CInput" id="overPanelAbout">
+                </div>
+                <div class="button" onclick="javascript:editAbout()">Save</div>
+            </div>`
+                };
+            }
+
+            function editAbout() {
+                let about = document.getElementById("overPanelAbout").value;
+                request("POST",
+                    `/api/addAbout?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&aboutStr=${encodeURIComponent(about)}`,
+                    (rawRes) => {
+                        if (rawRes == "success") {
+                            populateProfileSection();
+                            closeOverPanel();
+                        }
+                    });
+            }
+
+            function postsRangeLeftButton() {
+                let diff = 10;
+                if (Variables.fromIndex - diff >= 0) {
+                    populatePostsSection((Variables.fromIndex - diff), (Variables.toIndex - diff));
+                }
+            }
+
+            function postsRangeRightButton() {
+                let diff = 10;
+                if (Variables.fromIndex < Variables.pageEntries - 1) {
+                    populatePostsSection((Variables.fromIndex + diff), (Variables.toIndex + diff));
+                }
+            }
+
+            function addPostButton() {
+                if (globalVars.loggedIn && Variables.pageUsername == globalVars.username) {
+                    globalElems.overPanel.style.display = "flex"
+                    globalElems.overPanel.innerHTML = `
+            <div class="sectionBG">
+                <div class="sectionTop">
+                    <div class="cH1">Add Post</div>
+                    <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                </div>
+                <hr>
+                <div class="overPanelInnerSection">
+                    <input type="text" class="CInput" id="overPanelPost">
+                </div>
+                <div class="button" onclick="javascript:addPost()">Save</div>
+            </div>`
+                }
+            }
+
+            function addPost() {
+                let post = document.getElementById("overPanelPost").value;
+                request("POST",
+                    `/api/addPost?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}&postStr=${encodeURIComponent(post)}`,
+                    function (rawRes) {
+                        if (rawRes == "success") {
+                            populatePostsSection(0, 9);
+                            closeOverPanel();
+                        }
+                    });
+            }
+
+            function startLoading() {
+                var urlPath = window.location.pathname.split("/")
+                Variables.pageUsername = urlPath[2]
+                populateProfileSection();
+                populatePostsSection(0, 9);
+            }
+            startLoading();
+        </script>
     </div>
 
+    <script>
+        var globalVars = {
+            loggedIn: false,
+            username: "",
+            password: "",
+        }
+        var globalElems = {
+            loginProfileButton: document.getElementById("loginProfileButton"),
+            overPanel: document.getElementById("overPanel"),
+            signOutProfileButton: document.getElementById("signOutProfileButton")
+        }
+
+        function retrieveData() {
+            let username = localStorage.getItem("username")
+            let password = localStorage.getItem("password")
+            if (username != null && password != null) {
+                request("POST",
+                    `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+                    (rawRes) => {
+                        if (rawRes == "success") {
+                            globalVars.loggedIn = true;
+                            globalVars.username = username;
+                            globalVars.password = password;
+
+                            globalElems.loginProfileButton.innerText = "Profile";
+                            globalElems.signOutProfileButton.style.display = "block";
+                            try {
+                                postLogin();
+                            } catch (e) {
+                                console.log("DEBUG: Warning post-login action not set on this page",
+                                    "color: yellow;")
+                            }
+                        }
+                    });
+            }
+        }
+        window.addEventListener("load", retrieveData);
+    </script>
 </body>
 
 </html>

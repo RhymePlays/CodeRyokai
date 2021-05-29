@@ -440,7 +440,11 @@ def error404Page(e):
 
 @app.route("/", methods=["GET", "POST"])
 def root():
-    return render_template_string(webUI["basePage"], mainSection = Markup("""<div class="sectionBG"><div class="sectionTop"><div class="cH1">Konnichiwa Sekai</div></div><hr><div style="margin: 10px">Welcome to CodeRyokai</div></div>"""))
+    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["homePage"]))
+
+@app.route("/about", methods=["GET", "POST"])
+def about():
+    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["aboutPage"]))
 
 @app.route("/user/<username>", methods=["GET", "POST"])
 def userPage(username):
@@ -462,6 +466,6 @@ def postPage(username, postIndexRaw):
 
 # Starting Point
 if __name__ == "__main__":
-    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/post.html", "pageTag": "postPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
+    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/home.html", "pageTag": "homePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/post.html", "pageTag": "postPage"}, {"fileLoc": "pages/about.html", "pageTag": "aboutPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
     savingThread = threading.Thread(target=autoSaveDatabase);savingThread.start()
     app.run(port=80, debug=True)

@@ -16,10 +16,17 @@
     }
     #likeButton{display: none;}
     #commentButton{display: none;}
+
+    @media screen and (max-width: 900px){
+        #postLikeAndComment{
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
 </style>
 
 <div class="sectionBG">
-    <div class="sectionTop">
+    <div class="sectionTop" id="postLikeAndComment">
         <div class="postPageInnerSectionTop">
             <div id="postLikes">0 Likes</div>
             <div id="likeButton" class="button" onclick="javascript:likeUnlikeButton()">Like</div>
@@ -27,7 +34,7 @@
         <div class="sep"></div>
         <div class="postPageInnerSectionTop">
             <div id="postComments">0 Comments</div>
-            <div id="commentButton" class="button" onclick="javascript:commentButton()">Comment</div>
+            <div id="commentButton" class="button greenButton" onclick="javascript:commentButton()">Comment</div>
         </div>
     </div>
 
@@ -135,11 +142,11 @@
                 <div class="sectionBG">
                     <div class="sectionTop">
                         <div class="cH1">Comment</div>
-                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                        <div class="button redButton" onclick="javascript:closeOverPanel()">Close</div>
                     </div>
                     <hr>
                     <div class="overPanelInnerSection">
-                        <input type="text" class="CInput" id="overPanelComment">
+                        <textarea type="text" class="CInput" id="overPanelComment"></textarea>
                     </div>
                     <div class="button" onclick="javascript:comment()">Comment</div>
                 </div>`

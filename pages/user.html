@@ -32,6 +32,17 @@
     #addPostButton {
         display: none;
     }
+
+    @media screen and (max-width: 900px) {
+        .profileContainer {
+            font-size: 15px;
+            flex-direction: column;
+        }
+
+        #postsRange{
+            font-size: 13px;
+        }
+    }
 </style>
 
 <div id="profileSection" class="sectionBG">
@@ -62,7 +73,7 @@
         <div class="button" onclick="javascript:postsRangeLeftButton()"><-</div>
         <div id="postsRange">(0-0)</div>
         <div class="button" onclick="javascript:postsRangeRightButton()">-></div>
-        <div class="button" id="addPostButton" onclick="javascript:addPostButton()">Add Post</div>
+        <div class="button greenButton" id="addPostButton" onclick="javascript:addPostButton()">Add Post</div>
     </div>
     <hr>
     <div id="postsContainer"></div>
@@ -181,11 +192,11 @@
             <div class="sectionBG">
                 <div class="sectionTop">
                     <div class="cH1">Edit About</div>
-                    <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    <div class="button redButton" onclick="javascript:closeOverPanel()">Close</div>
                 </div>
                 <hr>
                 <div class="overPanelInnerSection">
-                    <input type="text" class="CInput" id="overPanelAbout">
+                    <textarea type="text" class="CInput" id="overPanelAbout"></textarea>
                 </div>
                 <div class="button" onclick="javascript:editAbout()">Save</div>
             </div>`
@@ -218,11 +229,11 @@
             <div class="sectionBG">
                 <div class="sectionTop">
                     <div class="cH1">Add Post</div>
-                    <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                    <div class="button redButton" onclick="javascript:closeOverPanel()">Close</div>
                 </div>
                 <hr>
                 <div class="overPanelInnerSection">
-                    <input type="text" class="CInput" id="overPanelPost">
+                    <textarea type="text" class="CInput" id="overPanelPost"></textarea>
                 </div>
                 <div class="button" onclick="javascript:addPost()">Save</div>
             </div>`

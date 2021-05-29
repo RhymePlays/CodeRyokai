@@ -44,6 +44,15 @@
             white-space: nowrap
         }
 
+        .redButton{
+            background-color: #FB1E46;
+        }
+
+        .greenButton{
+            background-color: #25FFB1;
+            color: #303030;
+        }
+
         .cVR {
             height: auto;
             width: 3px;
@@ -89,6 +98,7 @@
             border-radius: 5px;
             padding: 5px;
             margin: 10px 0px;
+            resize: vertical;
         }
 
         /* TopBar */
@@ -112,6 +122,7 @@
             font-weight: bold;
             width: 100%;
             margin-left: 10px;
+            cursor: pointer;
         }
 
         #signOutProfileButton{
@@ -167,6 +178,55 @@
             margin: 5px 0px;
             font-size: 20px;
         }
+
+        @media screen and (max-width: 900px) {
+                /* Global */
+                .button {
+                    font-size: 12px;
+                    padding: 5px 8px;
+                }
+
+                .cH1 {
+                    font-size: 20px;
+                }
+
+                .cVR {
+                    width: auto;
+                    height: 3px;
+                    margin: 10px 0px;
+                }
+
+                /* topSection */
+                #topBar {
+                    height: 35px;
+                }
+
+                #logo {
+                    min-height: 33px;
+                    min-width: 33px;
+                    margin-left: 0px;
+                }
+
+                #topName {
+                    font-size: 18px;
+                    margin-left: 5px;
+                }
+            
+
+                /* body */
+                .sectionBG {
+                    width: 100%;
+                    border-radius: 5px;
+                }
+
+                .postItemInfo {
+                    font-size: 15px;
+                }
+
+                .postItemText {
+                    font-size: 18px;
+                }
+            }
     </style>
 
 </head>
@@ -191,7 +251,7 @@
                 <div class="sectionBG">
                     <div class="sectionTop">
                         <div class="cH1">Login</div>
-                        <div class="button" onclick="javascript:closeOverPanel()">Close</div>
+                        <div class="button redButton" onclick="javascript:closeOverPanel()">Close</div>
                     </div>
                     <hr>
                     <div class="overPanelInnerSection">
@@ -294,12 +354,15 @@
             }
             postItem.append(postItemLeft, postItemRight);
             return postItem
-        }
+        }   
+    
+        function homeRedirect(){window.location.href = "/"}
+    
     </script>
 
     <div id="topBar">
         <div id="logo"></div>
-        <div id="topName">CodeRyokai</div>
+        <div id="topName" onclick="javascript:homeRedirect()">CodeRyokai</div>
         <div class="button" id="signOutProfileButton" onclick="javascript:signOutProfileButton()">Sign Out</div>
         <div class="button" id="loginProfileButton" onclick="javascript:loginProfileButton()">Login</div>
     </div>

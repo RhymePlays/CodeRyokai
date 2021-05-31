@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template_string
 import time, json, hashlib, threading
+from random import choice
 from markupsafe import Markup
 
 # Initing Flask
@@ -8,9 +9,12 @@ app = Flask(__name__)
 # Variables
 hashSalt = "Ryokai+LongLiveMyAnimeWaifus"
 allowedUsernameChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", "."]
-accounts = {}
 webUI = {}
 autoSave = True
+
+accounts = {}
+posts = []
+
 
 # Function
 def usernameCharCheck(username):
@@ -37,11 +41,12 @@ def authCheck(username, password):
         return False
 
 def loadDatabase():
-    global accounts
+    global accounts, posts
     try:
         with open("data.json", "r") as f:
             data = json.loads(f.read())
-            accounts = data
+            accounts = data["accounts"]
+            posts = data["posts"]
     except:
         print("Failed to load database")
 
@@ -50,7 +55,7 @@ def autoSaveDatabase():
         time.sleep(100)
         try:
             with open("data.json", "w") as f:
-                f.write(json.dumps(accounts))
+                f.write(json.dumps({"accounts" :accounts, "posts": posts}))
             print("Auto-saved database "+str(time.time()))
         except:
             print("Failed to auto-save database "+str(time.time()))
@@ -74,7 +79,7 @@ def saveDatabase(code):
     if code == "LongLiveMyAnimeWaifus":
         try:
             with open("data.json", "w") as f:
-                f.write(json.dumps(accounts))
+                f.write(json.dumps({"accounts" :accounts, "posts": posts}))
             return "success"
         except:
             return "error"
@@ -183,6 +188,7 @@ def addPost():
 
             if authCheck(username, password) and (len(postStr) >= 1):
                 accounts[username]["posts"].insert(0 ,{"postStr": postStr, "time": time.time(), "id": f'{username}#{len(accounts[username]["posts"])}', "likes": [], "comments": [], "isCommentTo": None})
+                posts.insert(0, f'{username}#{len(accounts[username]["posts"])-1}')
                 return "success"
             else:
                 return "error"
@@ -371,7 +377,8 @@ def comment():
                         accounts[username]["posts"].insert(0, {"postStr": commentStr, "time": time.time(), "id": commentId, "likes": [], "comments": [], "isCommentTo": postId})
 
                         accounts[splittedPostId[0]]["posts"][postIndex+1]["comments"].insert(0, commentId)
-                        accounts[username]["comments"].append({"commentOn": postId, "comment": commentId})
+                        accounts[username]["comments"].insert(0, {"commentOn": postId, "comment": commentId})
+                        posts.insert(0, commentId)
                         return "success"
                     else:
                         return "error"
@@ -429,6 +436,50 @@ def getPostComments():
             else:
                 return "error"
         else:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/getTrendingPosts", methods=["GET"])
+def getTrendingPosts():
+    if request.method == "GET":
+        returnValue = []
+        try:
+            # while len(returnValue) < 10:
+            for i in range(10):
+                splittedPostId = choice(posts).split("#")
+                if len(splittedPostId) == 2:
+                    if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]):
+                        commentIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
+                        if commentIndex >= 0:
+                            postObj = {"postStr": accounts[splittedPostId[0]]["posts"][commentIndex]["postStr"], "time": accounts[splittedPostId[0]]["posts"][commentIndex]["time"], "id": accounts[splittedPostId[0]]["posts"][commentIndex]["id"], "likes": len(accounts[splittedPostId[0]]["posts"][commentIndex]["likes"]), "comments": len(accounts[splittedPostId[0]]["posts"][commentIndex]["comments"]), "isCommentTo": accounts[splittedPostId[0]]["posts"][commentIndex]["isCommentTo"]}
+                            if postObj not in returnValue:
+                                returnValue.append(postObj)
+
+            return json.dumps(returnValue)
+        except:
+            return "error"
+    else:
+        return "error"
+
+@app.route("/api/getRecommendedPosts", methods=["GET"])
+def getRecommendedPosts():
+    if request.method == "GET":
+        returnValue = []
+        try:
+            # while len(returnValue) < 10:
+            for i in range(10):
+                splittedPostId = choice(posts).split("#")
+                if len(splittedPostId) == 2:
+                    if (splittedPostId[0] in accounts) and strToIntCheck(splittedPostId[1]):
+                        commentIndex = (len(accounts[splittedPostId[0]]["posts"]) - int(splittedPostId[1])) - 1
+                        if commentIndex >= 0:
+                            postObj = {"postStr": accounts[splittedPostId[0]]["posts"][commentIndex]["postStr"], "time": accounts[splittedPostId[0]]["posts"][commentIndex]["time"], "id": accounts[splittedPostId[0]]["posts"][commentIndex]["id"], "likes": len(accounts[splittedPostId[0]]["posts"][commentIndex]["likes"]), "comments": len(accounts[splittedPostId[0]]["posts"][commentIndex]["comments"]), "isCommentTo": accounts[splittedPostId[0]]["posts"][commentIndex]["isCommentTo"]}
+                            if postObj not in returnValue:
+                                returnValue.append(postObj)
+
+            return json.dumps(returnValue)
+        except:
             return "error"
     else:
         return "error"

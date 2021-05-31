@@ -1,19 +1,44 @@
-<style>
-    #postsRange {
-        color: #A0A0A0;
-        font-weight: normal;
-        white-space: nowrap;
-    }
-</style>
-
 <div class="sectionBG">
     <div class="sectionTop">
         <div class="cH1">Home</div>
-        <div class="button" onclick=""><-</div>
-        <div id="postsRange">(0-0)</div>
-        <div class="button" onclick="">-></div>
-        <div class="button" id="postButton" onclick="">Post</div>
+        <!-- <div class="button" id="postButton" onclick="">Post</div> -->
     </div>
     <hr>
     <div id="postsContainer"></div>
 </div>
+
+<script>
+    var Elements = {
+        postsContainer: document.getElementById("postsContainer")
+    }
+
+    function postLogin(){populatePost();}
+
+    function populatePost(){
+            if (globalVars.loggedIn){        
+                request("GET", `/api/getRecommendedPosts?username=${encodeURIComponent(globalVars.username)}&password=${encodeURIComponent(globalVars.password)}`, function(rawRes){
+                    if (rawRes != "error"){
+                        let res = JSON.parse(rawRes);
+                        
+                        Elements.postsContainer.textContent = "";
+                        for (postIndex in res){
+                            Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments, res[postIndex].isCommentTo));
+                        }
+                    }
+                });
+            }else{
+                request("GET", `/api/getTrendingPosts`, function(rawRes){
+                    if (rawRes != "error"){
+                        let res = JSON.parse(rawRes);
+                        
+                        Elements.postsContainer.textContent = "";
+                        for (postIndex in res){
+                            Elements.postsContainer.append(createChatItem(res[postIndex].id, res[postIndex].time, res[postIndex].postStr, res[postIndex].likes, res[postIndex].comments, res[postIndex].isCommentTo));
+                        }
+                    }
+                });
+            }
+        }
+
+        window.addEventListener("load", populatePost);
+</script>

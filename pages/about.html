@@ -3,6 +3,9 @@
         padding: 10px;
         font-size: 20px;
     }
+    #gitLink{
+        cursor: pointer;
+    }
 </style>
 
 <div class="sectionBG">
@@ -11,8 +14,51 @@
     </div>
     <hr>
     <div id="aboutContainer">
-        Konnichiwa Sekai!! <br>
-        Welcome to CodeRyokai. <br><br>
-        This about page hasn't been finished yet.
+        <p id="codeRyokaiKatakana">コードリョカイ</p>
+        <p>
+            Konnichiwa Sekai!!<br>
+            Welcome to CodeRyokai.
+        </p>
+        <p>
+            CodeRyokai is a Forum-Like Social Media Site.<br>
+            This platform is Text-Only.<br><br>
+
+            CodeRyokai is made by 2 High-School Students, under 2 weeks.<br>
+            If this site get's enough support new features and fixes might be added, but no promises.<br><br>
+
+            Copyright © 2021 CodeRyokai. All rights reserved.
+        </p>
     </div>
 </div>
+
+<div class="sectionBG">
+    <div class="sectionTop">
+        <div class="cH1">Credits</div>
+    </div>
+    <hr>
+    <div id="aboutContainer">
+        <b>Design And Idea by:</b> <span>RhymePlays (Isfar Tausif Rhyme)</span><br>
+        <b>FrontEnd (HTML, CSS) by:</b> <span>ahnafmubtasim19</span><br>
+        <b>FrontEnd (JS) by:</b> <span>RhymePlays (Isfar Tausif Rhyme)</span><br>
+        <b>BackEnd by:</b> <span>RhymePlays (Isfar Tausif Rhyme)</span><br>
+
+        <div class="button" id="gitLink" onclick='javascript:window.open("https://github.com/RhymePlays/CodeRyokai", "_blank");'>GitHub Repo</div>
+    </div>
+</div>
+
+<div class="sectionBG">
+    <div class="sectionTop">
+        <div class="cH1">Terms and Conditions</div>
+    </div>
+    <hr>
+    <div id="aboutContainer">
+        The Devs and the people running site are not going to be be responsible for anything you might come across or do on this site.<br>
+        This site has little to no Rules set in place, so use this site at your own risk.<br>
+        By using the site you're agreeing to the Terms and Conditions.
+    </div>
+</div>
+
+<script>
+    document.getElementById("codeRyokaiKatakana").innerText=decodeURI("%E3%82%B3%E3%83%BC%E3%83%89%E3%83%AA%E3%83%A7%E3%82%AB%E3%82%A4")
+    document.getElementById("codeRyokaiKatakana").style.color="#25FFB1"
+</script>

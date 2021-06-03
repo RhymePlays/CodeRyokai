@@ -331,6 +331,7 @@
             postItemId.className = "postItemInfo";
             postItemId.innerText = `Id: ${postId}`;
             postItemId.style.cursor = "pointer"
+			postItemId.style.color = "#1badff"
             postItemId.setAttribute("onclick", `javascript:openPost("${postId}")`)
             let postItemTime = document.createElement("div");
             postItemTime.className = "postItemInfo";
@@ -347,6 +348,7 @@
                 commentTo.className = "postItemInfo";
                 commentTo.innerText = `Commented on: ${isCommentTo}`;
                 commentTo.style.cursor = "pointer"
+                commentTo.style.color = "#1badff"
                 commentTo.setAttribute("onclick", `javascript:openPost("${isCommentTo}")`)
                 postItemRight.append(commentTo, postItemId, postItemTime, postItemText, postItemLikesNComments);
             }

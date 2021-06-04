@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template_string
 import time, json, hashlib, threading
 from random import choice
+from flask.templating import render_template
 from markupsafe import Markup
 
 # Initing Flask
@@ -9,7 +10,6 @@ app = Flask(__name__)
 # Variables
 hashSalt = "Ryokai+LongLiveMyAnimeWaifus"
 allowedUsernameChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_", "."]
-webUI = {}
 autoSave = True
 
 accounts = {}
@@ -59,14 +59,6 @@ def autoSaveDatabase():
             print("Auto-saved database "+str(time.time()))
         except:
             print("Failed to auto-save database "+str(time.time()))
-
-def loadWebUI(pageLoadQueue):
-    for page in pageLoadQueue:
-        try:
-            with open(page["fileLoc"], "r") as f:
-                webUI[page["pageTag"]] = f.read()
-        except:
-            print("Failed to load "+str(page["pageTag"]))
 
 # API Routes
 @app.route("/ping", methods=["GET", "POST"])
@@ -376,7 +368,8 @@ def comment():
 
                         accounts[username]["posts"].insert(0, {"postStr": commentStr, "time": time.time(), "id": commentId, "likes": [], "comments": [], "isCommentTo": postId})
 
-                        accounts[splittedPostId[0]]["posts"][postIndex+1]["comments"].insert(0, commentId)
+                        if(splittedPostId[0]==username): accounts[splittedPostId[0]]["posts"][postIndex+1]["comments"].insert(0, commentId)
+                        else: accounts[splittedPostId[0]]["posts"][postIndex]["comments"].insert(0, commentId)
                         accounts[username]["comments"].insert(0, {"commentOn": postId, "comment": commentId})
                         posts.insert(0, commentId)
                         return "success"
@@ -487,36 +480,36 @@ def getRecommendedPosts():
 # UI Routes
 @app.errorhandler(404)
 def error404Page(e):
-    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+    # return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+    return render_template("base.html", mainSection = Markup(render_template("404.html")))
 
 @app.route("/", methods=["GET", "POST"])
 def root():
-    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["homePage"]))
+    return render_template("base.html", mainSection = Markup(render_template("home.html")))
 
 @app.route("/about", methods=["GET", "POST"])
 def about():
-    return render_template_string(webUI["basePage"], mainSection = Markup(webUI["aboutPage"]))
+    return render_template("base.html", mainSection = Markup(render_template("about.html")))
 
 @app.route("/user/<username>", methods=["GET", "POST"])
 def userPage(username):
     if username in accounts:
-        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["userPage"]))
+        return render_template("base.html", mainSection = Markup(render_template("user.html")))
     else:
-        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+        return render_template("base.html", mainSection = Markup(render_template("404.html")))
 
 @app.route("/user/<username>/<postIndexRaw>", methods=["GET", "POST"])
 def postPage(username, postIndexRaw):
     if (username in accounts) and strToIntCheck(postIndexRaw):
         postIndex = (len(accounts[username]["posts"]) - int(postIndexRaw)) - 1
         if postIndex >= 0:
-            return render_template_string(webUI["basePage"], mainSection = Markup(webUI["postPage"]))
+            return render_template("base.html", mainSection = Markup(render_template("post.html")))
         else: 
-            return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+            return render_template("base.html", mainSection = Markup(render_template("404.html")))
     else:
-        return render_template_string(webUI["basePage"], mainSection = Markup(webUI["404Page"]))
+        return render_template("base.html", mainSection = Markup(render_template("404.html")))
 
 # Starting Point
 if __name__ == "__main__":
-    loadDatabase();loadWebUI([{"fileLoc": "pages/base.html", "pageTag": "basePage"}, {"fileLoc": "pages/home.html", "pageTag": "homePage"}, {"fileLoc": "pages/user.html", "pageTag": "userPage"}, {"fileLoc": "pages/post.html", "pageTag": "postPage"}, {"fileLoc": "pages/about.html", "pageTag": "aboutPage"}, {"fileLoc": "pages/404.html", "pageTag": "404Page"}])
     savingThread = threading.Thread(target=autoSaveDatabase);savingThread.start()
     app.run(port=80, debug=True)
